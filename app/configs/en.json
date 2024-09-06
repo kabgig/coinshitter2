@@ -1,0 +1,10 @@
+{
+  "fields": {
+    "ownerWalletAddress": "Minted tokens will be deposited on this address",
+    "totalSupply": "Amount of tokens minted and deposited to the owners' wallet",
+    "tokenName": "Full name of the token",
+    "tokenSymbol": "Short token symbol, for example BTC or ETH",
+    "deployDate": "When the token was deployed",
+    "marketingAddress": "This address will receive the marketing fee"
+  }
+}
