@@ -1,11 +1,7 @@
-import { useState } from "react";
-//import LaunchForm from "../components/LaunchForm";
+import LaunchForm from "../components/LaunchForm";
 
 const LaunchPage = () => {
-  const [isWalletConnected] = useState(true);
-
-  return "Hello";
-  //isWalletConnected ? <LaunchForm /> : null;
+  return <LaunchForm />;
 };
 
 export default LaunchPage;

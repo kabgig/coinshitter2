@@ -1,9 +1,9 @@
-import "@radix-ui/themes/styles.css";
-import { Box, Container, Theme } from "@radix-ui/themes";
+
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
 import NavBar from "./components/NavBar";
+import "./globals.css";
+import { Box, ChakraProvider } from '@chakra-ui/react'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -31,12 +31,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Theme accentColor="purple">
+        <ChakraProvider>
           <NavBar />
           <main className="p-5">
-            <Container>{children}</Container>
+            <Box>{children}</Box>
           </main>
-        </Theme>
+        </ChakraProvider>
       </body>
     </html>
   );
