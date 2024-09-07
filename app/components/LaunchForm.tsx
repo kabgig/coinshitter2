@@ -66,7 +66,6 @@ const LaunchForm = () => {
     <Box p={4} maxWidth="500px" mx="auto">
       <form onSubmit={formik.handleSubmit}>
         <VStack spacing={4}>
-          //Owner Wallet Address
           <FormControl
             id="ownerWalletAddress"
             isInvalid={
@@ -92,7 +91,7 @@ const LaunchForm = () => {
               </FormErrorMessage>
             ) : null}
           </FormControl>
-          //Total Supply
+
           <FormControl
             id="totalSupply"
             isInvalid={
@@ -112,7 +111,7 @@ const LaunchForm = () => {
               <FormErrorMessage>{formik.errors.totalSupply}</FormErrorMessage>
             ) : null}
           </FormControl>
-          //Token Name
+
           <FormControl
             id="tokenName"
             isInvalid={formik.touched.tokenName && !!formik.errors.tokenName}
@@ -130,7 +129,7 @@ const LaunchForm = () => {
               <FormErrorMessage>{formik.errors.tokenName}</FormErrorMessage>
             ) : null}
           </FormControl>
-          //Token Symbol
+
           <FormControl
             id="tokenSymbol"
             isInvalid={
@@ -150,7 +149,7 @@ const LaunchForm = () => {
               <FormErrorMessage>{formik.errors.tokenSymbol}</FormErrorMessage>
             ) : null}
           </FormControl>
-          //Chain
+
           <FormControl
             id="chain"
             isInvalid={formik.touched.chain && !!formik.errors.chain}
@@ -167,7 +166,7 @@ const LaunchForm = () => {
               <FormErrorMessage>{formik.errors.chain}</FormErrorMessage>
             ) : null}
           </FormControl>
-          //Marketing Wallet Address
+
           <FormControl
             id="marketingAddress"
             isInvalid={

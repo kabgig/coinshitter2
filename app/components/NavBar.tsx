@@ -28,13 +28,19 @@ const NavBar = () => {
         <HStack gap={10} fontWeight="bold">
           <Link href="/">
             {colorMode === "light" ? (
-              <Image src={logo.src} boxSize="200px" objectFit="contain" />
+              <Image
+                src={logo.src}
+                boxSize="200px"
+                objectFit="contain"
+                alt="logo"
+              />
             ) : (
               <Image
                 src={logo.src}
                 boxSize="200px"
                 objectFit="contain"
                 filter="invert(1)"
+                alt="logo"
               />
             )}
           </Link>
