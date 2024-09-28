@@ -14,6 +14,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import useLocale from "../hooks/useLocales";
 import FormTooltip from "./FormTooltip";
+import axios from "axios";
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -56,8 +57,9 @@ const LaunchForm = () => {
         .required("This field is required")
         .oneOf(["BNB", "BNB1", "BNB2"], "Invalid option selected"),
     }),
-    onSubmit: (values, { setSubmitting }) => {
-      console.log("values", values);
+    onSubmit: async (values, { setSubmitting }) => {
+      const { data } = await axios.post("/api/deploy", values);
+      console.log("data", data);
       setSubmitting(false);
     },
   });
