@@ -7,21 +7,20 @@ import {
   Spacer,
   Text,
   useColorMode,
-  useColorModeValue,
 } from "@chakra-ui/react";
-import Link from "next/link";
-import logo from "../../public/logo.png";
-import ColorModeSwitch from "./ColorModeSwitch";
 import { ethers } from "ethers";
+import Link from "next/link";
 import { useEffect } from "react";
+import logo from "../../public/logo.png";
 import useGlobalStore from "../state/store";
+import AddressBadge from "./AddressBadge";
+import ColorModeSwitch from "./ColorModeSwitch";
 import ConnectWallet from "./ConnectWalletButton";
 
 const NavBar = () => {
   const { colorMode } = useColorMode();
   const { txBeingSent, currentBalance, setCurrentBalance, currentConnection } =
     useGlobalStore();
-  const borderColor = useColorModeValue("black", "white");
 
   useEffect(() => {
     (async () => {
@@ -37,92 +36,6 @@ const NavBar = () => {
       }
     })();
   }, [currentConnection, txBeingSent]);
-
-  //   if (window.ethereum === undefined) {
-  //     setNetworkError("Please install MetaMask!");
-  //     return;
-  //   }
-
-  //   if (!(await _checkNetwork())) {
-  //     return;
-  //   }
-
-  //   const [selectedAccount] = await window.ethereum.request({
-  //     method: "eth_requestAccounts",
-  //   });
-
-  //   await _initialize(ethers.getAddress(selectedAccount));
-
-  //   window.ethereum.on(
-  //     "accountsChanged",
-  //     async ([newAccount]: [newAccount: string]) => {
-  //       if (newAccount === undefined) {
-  //         return _resetState();
-  //       }
-
-  //       await _initialize(ethers.getAddress(newAccount));
-  //     }
-  //   );
-
-  //   window.ethereum.on("chainChanged", ([_networkId]: any) => {
-  //     _resetState();
-  //   });
-  // };
-
-  // const _initialize = async (selectedAccount: string) => {
-  //   const provider = new ethers.BrowserProvider(window.ethereum);
-  //   const signer = await provider.getSigner(selectedAccount);
-
-  //   setCurrentConnection({
-  //     ...currentConnection,
-  //     provider,
-  //     signer,
-  //   });
-  // };
-
-  // const _checkNetwork = async (): Promise<boolean> => {
-  //   const chosenChainId = await window.ethereum.request({
-  //     method: "eth_chainId",
-  //   });
-
-  //   if (chosenChainId === HARDHAT_NETWORK_ID) {
-  //     return true;
-  //   }
-  //   setNetworkError("Please connect to Hardhat network (localhost:8545)");
-  //   return false;
-  // };
-
-  // const _resetState = () => {
-  //   setNetworkError(undefined);
-  //   setTransactionError(undefined);
-  //   setTxBeingSent(undefined);
-  //   setCurrentBalance(undefined);
-  //   setIsOwner(false);
-  //   setCurrentConnection({
-  //     provider: undefined,
-  //     signer: undefined,
-  //   });
-  // };
-
-  // const _dismissNetworkError = () => {
-  //   setNetworkError(undefined);
-  // };
-
-  // const _dismissTransactionError = () => {
-  //   setTransactionError(undefined);
-  // };
-
-  // const _getRpcErrorMessage = (error: any): string => {
-  //   console.log(error);
-  //   if (error.data) {
-  //     return error.data.message;
-  //   }
-  //   return error.message;
-  // };
-  const formatAddress = (address: string): string => {
-    if (!address) return "";
-    return `${address.slice(0, 7)}...${address.slice(-4)}`;
-  };
 
   return (
     <Flex
@@ -163,19 +76,10 @@ const NavBar = () => {
       <Box>
         <HStack gap={10} fontWeight="bold">
           {currentBalance && (
-            <Text fontSize="xs"> {ethers.formatEther(currentBalance)} ETH</Text>
+            <Text fontSize="xs"> {ethers.formatEther(currentBalance)}</Text>
           )}
           {currentConnection?.signer && (
-            <Text
-              fontSize="xs"
-              variant="outline"
-              borderWidth="2px"
-              borderRadius="10"
-              p="2"
-              borderColor={borderColor}
-            >
-              {formatAddress(currentConnection.signer.address)}
-            </Text>
+            <AddressBadge address={currentConnection.signer.address} />
           )}
           {!currentConnection?.signer && <ConnectWallet />}
           <ColorModeSwitch />

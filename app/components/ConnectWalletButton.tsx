@@ -1,8 +1,8 @@
-import React from "react";
-import NetworkErrorMessage from "./NetworkErrorMessage";
 import { Button, useColorModeValue } from "@chakra-ui/react";
-import useGlobalStore from "../state/store";
 import { ethers } from "ethers";
+import React from "react";
+import useGlobalStore from "../state/store";
+import NetworkErrorMessage from "./NetworkErrorMessage";
 
 const HARDHAT_NETWORK_ID = "0x539";
 
@@ -15,6 +15,7 @@ const ConnectWalletButton: React.FC = () => {
     setCurrentConnection,
     currentConnection,
     setTransactionError,
+    txBeingSent,
     setTxBeingSent,
     setCurrentBalance,
     setIsOwner,
