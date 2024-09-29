@@ -35,6 +35,7 @@ const NavBar = () => {
         );
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConnection, txBeingSent]);
 
   return (

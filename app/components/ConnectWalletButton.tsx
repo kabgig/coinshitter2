@@ -15,7 +15,7 @@ const ConnectWalletButton: React.FC = () => {
     setCurrentConnection,
     currentConnection,
     setTransactionError,
-    txBeingSent,
+
     setTxBeingSent,
     setCurrentBalance,
     setIsOwner,
@@ -49,7 +49,7 @@ const ConnectWalletButton: React.FC = () => {
       }
     );
 
-    window.ethereum.on("chainChanged", ([_networkId]: any) => {
+    window.ethereum.on("chainChanged", () => {
       _resetState();
     });
   };
@@ -93,17 +93,17 @@ const ConnectWalletButton: React.FC = () => {
     setNetworkError(undefined);
   };
 
-  const _dismissTransactionError = () => {
-    setTransactionError(undefined);
-  };
+  // const _dismissTransactionError = () => {
+  //   setTransactionError(undefined);
+  // };
 
-  const _getRpcErrorMessage = (error: any): string => {
-    console.log(error);
-    if (error.data) {
-      return error.data.message;
-    }
-    return error.message;
-  };
+  // const _getRpcErrorMessage = (error: any): string => {
+  //   console.log(error);
+  //   if (error.data) {
+  //     return error.data.message;
+  //   }
+  //   return error.message;
+  // };
   return (
     <div>
       <Button
