@@ -1,14 +1,25 @@
 import { exec } from "child_process";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
-export async function POST(): Promise<void | Response> {
+export async function POST(request: NextRequest): Promise<void | Response> {
+  const body = await request.json();
+
   return new Promise((resolve, reject) => {
     const deployScriptPath = path.resolve(process.cwd(), "scripts/deployer.ts");
-    console.log(deployScriptPath);
-
     exec(
       `npx hardhat run ${deployScriptPath} --network hardhat`,
+      {
+        env: {
+          ...process.env,
+          ownerWalletAddress: body.ownerWalletAddress,
+          totalSupply: body.totalSupply,
+          tokenName: body.tokenName,
+          tokenSymbol: body.tokenSymbol,
+          marketingAddress: body.marketingAddress,
+          chain: body.chain,
+        },
+      },
       (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing script: ${stderr}`);

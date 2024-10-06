@@ -59,7 +59,6 @@ const LaunchForm = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       const { data } = await axios.post("/api/deploy", values);
-      console.log("data", data);
       setSubmitting(false);
     },
   });
