@@ -11,8 +11,15 @@ export default async function main() {
   const coinshitter = await Coinshitter.deploy();
   await coinshitter.waitForDeployment();
   const address = await coinshitter.getAddress();
+
   console.log("Deployed contract address:", address);
-  console.log(JSON.stringify({ address }));
+  console.log(
+    JSON.stringify({
+      contractAddress: address,
+      deployer: deployer.address,
+      network: hre.network.name,
+    })
+  );
   return address;
 }
 

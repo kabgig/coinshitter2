@@ -19,13 +19,11 @@ export async function POST(): Promise<void | Response> {
         console.log("\nScript output:\n\n" + stdout);
 
         const jsonMatch = stdout.match(/\{.*?\}/);
-        console.log("jsonMatch", jsonMatch);
+
         if (jsonMatch) {
           try {
             const jsonOutput = JSON.parse(jsonMatch[0]);
-            resolve(
-              NextResponse.json({ message: `address: ${jsonOutput.address}` })
-            );
+            resolve(NextResponse.json(jsonOutput));
           } catch (parseError) {
             console.error(`Error parsing JSON output: ${parseError}`);
             reject(
