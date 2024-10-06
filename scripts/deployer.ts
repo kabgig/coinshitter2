@@ -13,28 +13,25 @@ export default async function main() {
   console.log("tokenName:", tokenName);
   console.log("tokenSymbol:", tokenSymbol);
   console.log("marketingAddress:", marketingAddress);
-  console.log("chain:", chain);
+  console.log("chain:", chain + "\n");
 
   await hre.run("compile");
 
   console.log("\nDEPLOYING...");
   const [deployer] = await ethers.getSigners();
-  console.log("Deploying contracts with the account:", deployer.address);
 
   const Coinshitter = await ethers.getContractFactory("Coinshitter");
   const coinshitter = await Coinshitter.deploy();
   await coinshitter.waitForDeployment();
   const address = await coinshitter.getAddress();
 
-  console.log("\nDeployed contract address:", address);
   console.log(
     JSON.stringify({
-      contractAddress: address,
-      deployer: deployer.address,
+      deployedContract: address,
+      deployerAddress: deployer.address,
       network: hre.network.name,
     })
   );
-  return address;
 }
 
 main()

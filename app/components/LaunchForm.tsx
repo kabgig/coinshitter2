@@ -9,16 +9,25 @@ import {
   InputGroup,
   Select,
   VStack,
+  Text,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import useLocale from "../hooks/useLocales";
 import FormTooltip from "./FormTooltip";
 import axios from "axios";
+import { useState } from "react";
+
+type DeployedTokenInfo = {
+  deployedContract: string;
+  deployerAddress: string;
+  network: string;
+};
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
+  const [deployedToken, setDeployedToken] = useState<DeployedTokenInfo>();
 
   const formik = useFormik({
     initialValues: {
@@ -59,6 +68,7 @@ const LaunchForm = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       const { data } = await axios.post("/api/deploy", values);
+      setDeployedToken(data);
       setSubmitting(false);
     },
   });
@@ -201,6 +211,16 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
+          {deployedToken && (
+            <Text fontSize="sm" color="gray.500">
+              <b>Deployed contract:</b> {deployedToken.deployedContract}
+              <br />
+              <b>Deployer address:</b> {deployedToken.deployerAddress}
+              <br />
+              <b>Network:</b> {deployedToken.network}
+              <br />
+            </Text>
+          )}
         </VStack>
       </form>
     </Box>
