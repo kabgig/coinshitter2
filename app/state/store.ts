@@ -14,6 +14,8 @@ interface globalStore {
   setTransactionError: (transactionError: string | undefined) => void;
   isOwner: boolean;
   setIsOwner: (isOwner: boolean) => void;
+  currentUserAddress: string | undefined;
+  setCurrentUserAddress: (currentUserAddress: string | undefined) => void;
 }
 
 const useGlobalStore = create<globalStore>((set) => ({
@@ -30,6 +32,9 @@ const useGlobalStore = create<globalStore>((set) => ({
     set({ transactionError: transactionError }),
   isOwner: false,
   setIsOwner: (isOwner) => set({ isOwner: isOwner }),
+  currentUserAddress: undefined,
+  setCurrentUserAddress: (currentUserAddress) =>
+    set({ currentUserAddress: currentUserAddress }),
 }));
 
 export default useGlobalStore;

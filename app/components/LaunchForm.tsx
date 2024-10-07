@@ -10,6 +10,7 @@ import {
   Select,
   VStack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -17,6 +18,7 @@ import useLocale from "../hooks/useLocales";
 import FormTooltip from "./FormTooltip";
 import axios from "axios";
 import { useState } from "react";
+import useGlobalStore from "../state/store";
 
 type DeployedTokenInfo = {
   deployedContract: string;
@@ -28,7 +30,21 @@ const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const [deployedToken, setDeployedToken] = useState<DeployedTokenInfo>();
+  const { currentConnection } = useGlobalStore();
+  const currentAddress = currentConnection?.signer?.getAddress();
+  const toast = useToast();
 
+  if (!currentAddress) {
+    toast({
+      title: "Wallet is not connected.",
+      description: "Please connect your wallet to deploy a token.",
+      status: "success",
+      duration: 9000,
+      isClosable: true,
+    });
+    return;
+  }
+  //сделать условие для проверки наличия подключения кошелька
   const formik = useFormik({
     initialValues: {
       ownerWalletAddress: "",
@@ -37,6 +53,7 @@ const LaunchForm = () => {
       tokenSymbol: "",
       marketingAddress: "",
       chain: "",
+      currentAddress: "",
     },
     validationSchema: Yup.object({
       ownerWalletAddress: Yup.string()
@@ -67,6 +84,7 @@ const LaunchForm = () => {
         .oneOf(["BNB", "BNB1", "BNB2"], "Invalid option selected"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
+      values.currentAddress = await currentAddress;
       const { data } = await axios.post("/api/deploy", values);
       setDeployedToken(data);
       setSubmitting(false);

@@ -4,6 +4,7 @@ import path from "path";
 
 export async function POST(request: NextRequest): Promise<void | Response> {
   const body = await request.json();
+  const currentAddress = body.currentAddress;
 
   return new Promise((resolve, reject) => {
     const deployScriptPath = path.resolve(process.cwd(), "scripts/deployer.ts");
@@ -18,6 +19,7 @@ export async function POST(request: NextRequest): Promise<void | Response> {
           tokenSymbol: body.tokenSymbol,
           marketingAddress: body.marketingAddress,
           chain: body.chain,
+          currentAddress,
         },
       },
       (error, stdout, stderr) => {

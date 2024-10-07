@@ -15,7 +15,7 @@ const ConnectWalletButton: React.FC = () => {
     setCurrentConnection,
     currentConnection,
     setTransactionError,
-
+    setCurrentUserAddress,
     setTxBeingSent,
     setCurrentBalance,
     setIsOwner,
