@@ -77,6 +77,7 @@ const ConnectWalletButton: React.FC = () => {
       chosenChainId === BNB_TESTNET_ID ||
       chosenChainId === BASE_MAINNET_ID
     ) {
+      console.log("CHAIN IS OK");
       return true;
     }
     setNetworkError("Please connect to Hardhat network (localhost:8545)");
