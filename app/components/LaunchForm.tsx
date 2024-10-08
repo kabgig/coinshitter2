@@ -67,13 +67,12 @@ const LaunchForm = () => {
         .test("is-eth-address", "Invalid address", (value) =>
           ethAddressRegex.test(value)
         ),
-      chain: Yup.string()
-        .required("This field is required")
-        .oneOf(["BNB", "BNB1", "BNB2"], "Invalid option selected"),
+      chain: Yup.string().required("This field is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       values.currentAddress = await currentAddress;
       const { data } = await axios.post("/api/deploy", values);
+      console.log("data", data);
       deployedToken.current = data;
       setSubmitting(false);
     },
@@ -190,9 +189,10 @@ const LaunchForm = () => {
             <FormLabel htmlFor="chain">Deployment chain</FormLabel>
             <InputGroup>
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BNB">BNB - Binance Smart Chain</option>
-                <option value="BNB1">BNB - Binance Smart Chain</option>
-                <option value="BNB2">BNB - Binance Smart Chain</option>
+                <option value="BNB_TEST">BNB - Testnet</option>
+                <option value="BNB_MAIN">BNB - Mainnet BSC</option>
+                <option value="HARDHAT">Hardhat</option>
+                <option value="BASE_MAIN">Base mainnet</option>
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (
@@ -233,7 +233,7 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
-          {deployedToken && (
+          {deployedToken.current && (
             <Text fontSize="sm" color="gray.500">
               <b>Deployed contract:</b>{" "}
               {deployedToken.current?.deployedContract}

@@ -5,6 +5,8 @@ import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
 
 const HARDHAT_NETWORK_ID = "0x539";
+const BNB_TESTNET_ID = "0x61";
+const BASE_MAINNET_ID = "0x2105";
 
 // declare let window: any;
 
@@ -70,7 +72,11 @@ const ConnectWalletButton: React.FC = () => {
       method: "eth_chainId",
     });
 
-    if (chosenChainId === HARDHAT_NETWORK_ID) {
+    if (
+      chosenChainId === HARDHAT_NETWORK_ID ||
+      chosenChainId === BNB_TESTNET_ID ||
+      chosenChainId === BASE_MAINNET_ID
+    ) {
       return true;
     }
     setNetworkError("Please connect to Hardhat network (localhost:8545)");

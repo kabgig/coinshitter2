@@ -5,6 +5,9 @@ import path from "path";
 export async function POST(request: NextRequest): Promise<void | Response> {
   const body = await request.json();
   const currentAddress = body.currentAddress;
+  const chain = body.chain;
+
+  console.log("chain", chain);
 
   return new Promise((resolve, reject) => {
     const deployScriptPath = path.resolve(process.cwd(), "scripts/deployer.ts");
