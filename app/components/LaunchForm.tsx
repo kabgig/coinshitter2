@@ -77,13 +77,35 @@ const LaunchForm = () => {
       // console.log("data", data);
       // deployedToken.current = data;
       // setSubmitting(false);
-      console.log(1);
+
       if (!currentAddress) {
         alert("Please connect your wallet first!");
         return;
       }
+
+      const networkMap: { [key: string]: bigint } = {
+        BNB_TEST: 97n,
+        BNB_MAIN: 56n,
+        HARDHAT: 1337n,
+        BASE_MAIN: 8453n,
+      };
+
+      const selectedChainId = networkMap[values.chain];
+
       const provider = new ethers.BrowserProvider(window.ethereum);
+      const walletNetwork = await provider.getNetwork();
+
+      if (walletNetwork.chainId !== selectedChainId) {
+        alert(
+          `Your wallet ${walletNetwork.name} network and deployment network ${values.chain} do not match.`
+        );
+        setSubmitting(false);
+        return;
+      }
       const signer = await provider.getSigner();
+      //
+      console.log(" provider.getNetwork()", provider.getNetwork());
+      console.log("signer", signer);
 
       const contractABI = CoinshitterArtifact.abi;
       const contractBytecode = CoinshitterArtifact.bytecode;
@@ -94,14 +116,14 @@ const LaunchForm = () => {
         signer
       );
 
-      try {
-        const contract = await factory.deploy(/* constructor arguments */);
-        await contract.waitForDeployment();
-        console.log("Contract deployed at:", contract.getAddress());
-      } catch (error) {
-        console.error("Error deploying contract:", error);
-      }
-      setSubmitting(false);
+      // try {
+      //   const contract = await factory.deploy(/* constructor arguments */);
+      //   await contract.waitForDeployment();
+      //   console.log("Contract deployed at:", contract.getAddress());
+      // } catch (error) {
+      //   console.error("Error deploying contract:", error);
+      // }
+      // setSubmitting(false);
     },
   });
 
