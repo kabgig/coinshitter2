@@ -19,6 +19,8 @@ import * as Yup from "yup";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
+import { ethers } from "ethers";
+import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 
 type DeployedTokenInfo = {
   deployedContract: string;
@@ -70,10 +72,35 @@ const LaunchForm = () => {
       chain: Yup.string().required("This field is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
-      values.currentAddress = await currentAddress;
-      const { data } = await axios.post("/api/deploy", values);
-      console.log("data", data);
-      deployedToken.current = data;
+      // values.currentAddress = await currentAddress;
+      // const { data } = await axios.post("/api/deploy", values);
+      // console.log("data", data);
+      // deployedToken.current = data;
+      // setSubmitting(false);
+      console.log(1);
+      if (!currentAddress) {
+        alert("Please connect your wallet first!");
+        return;
+      }
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const contractABI = CoinshitterArtifact.abi;
+      const contractBytecode = CoinshitterArtifact.bytecode;
+
+      const factory = new ethers.ContractFactory(
+        contractABI,
+        contractBytecode,
+        signer
+      );
+
+      try {
+        const contract = await factory.deploy(/* constructor arguments */);
+        await contract.waitForDeployment();
+        console.log("Contract deployed at:", contract.getAddress());
+      } catch (error) {
+        console.error("Error deploying contract:", error);
+      }
       setSubmitting(false);
     },
   });
