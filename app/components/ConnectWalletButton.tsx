@@ -1,6 +1,6 @@
 import { Button, useColorModeValue } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import React, { useEffect } from "react";
+import React, { use, useEffect } from "react";
 import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
 
@@ -31,38 +31,39 @@ const ConnectWalletButton: React.FC = () => {
     }
   }, [currentConnection]);
 
+  useEffect(() => {
+    const handleAccountsChanged = async ([newAccount]: [
+      newAccount: string
+    ]) => {
+      console.log("account is changed");
+      if (newAccount === undefined) {
+        return _resetState();
+      }
+
+      await _initialize(ethers.getAddress(newAccount));
+    };
+
+    window.ethereum.on("accountsChanged", handleAccountsChanged);
+
+    window.ethereum.on("chainChanged", () => {
+      console.log("chain is changed");
+      _resetState();
+    });
+  }, []);
+
   const _connectWallet = async () => {
     if (window.ethereum === undefined) {
       setNetworkError("Please install MetaMask!");
       return;
     }
 
-    if (!(await _checkNetwork())) {
-      return;
-    }
+    if (!(await _checkNetwork())) return;
 
     const [selectedAccount] = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
 
     await _initialize(ethers.getAddress(selectedAccount));
-
-    window.ethereum.on(
-      //listener нужно делать в useEffect, сейчас не срабатывает при изменении аккаунта в metamask
-      "accountsChanged",
-      async ([newAccount]: [newAccount: string]) => {
-        console.log("account is changed");
-        if (newAccount === undefined) {
-          return _resetState();
-        }
-
-        await _initialize(ethers.getAddress(newAccount));
-      }
-    );
-
-    window.ethereum.on("chainChanged", () => {
-      _resetState();
-    });
   };
 
   const _initialize = async (selectedAccount: string) => {
@@ -75,7 +76,6 @@ const ConnectWalletButton: React.FC = () => {
       signer,
     };
     setCurrentConnection(connection);
-    console.log("connectionChanged", connection);
     localStorage.setItem("currentConnection", JSON.stringify(connection));
   };
 
@@ -111,17 +111,6 @@ const ConnectWalletButton: React.FC = () => {
     setNetworkError(undefined);
   };
 
-  // const _dismissTransactionError = () => {
-  //   setTransactionError(undefined);
-  // };
-
-  // const _getRpcErrorMessage = (error: any): string => {
-  //   console.log(error);
-  //   if (error.data) {
-  //     return error.data.message;
-  //   }
-  //   return error.message;
-  // };
   return (
     <div>
       <Button
@@ -142,3 +131,15 @@ const ConnectWalletButton: React.FC = () => {
   );
 };
 export default ConnectWalletButton;
+
+// const _dismissTransactionError = () => {
+//   setTransactionError(undefined);
+// };
+
+// const _getRpcErrorMessage = (error: any): string => {
+//   console.log(error);
+//   if (error.data) {
+//     return error.data.message;
+//   }
+//   return error.message;
+// };
