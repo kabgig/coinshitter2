@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { Button, FormControl, FormLabel, Input } from "@chakra-ui/react";
 
 const SubscribeForm = () => {

@@ -1,23 +1,40 @@
 "use client";
 import {
+  Badge,
   Box,
   Button,
+  Flex,
   FormControl,
   FormErrorMessage,
   FormLabel,
   Input,
   InputGroup,
   Select,
+  Text,
   VStack,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
+import { useRef } from "react";
 import * as Yup from "yup";
 import useLocale from "../hooks/useLocales";
+import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
+import { ethers } from "ethers";
+import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+
+type DeployedTokenInfo = {
+  date: string;
+  deployedContract: string;
+  deployerAddress: string;
+  network: string;
+};
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
+  const deployedToken = useRef<DeployedTokenInfo>();
+  const { currentConnection } = useGlobalStore();
+  const currentAddress = currentConnection?.signer?.getAddress() || "";
 
   const formik = useFormik({
     initialValues: {
@@ -27,6 +44,7 @@ const LaunchForm = () => {
       tokenSymbol: "",
       marketingAddress: "",
       chain: "",
+      currentAddress: "",
     },
     validationSchema: Yup.object({
       ownerWalletAddress: Yup.string()
@@ -52,15 +70,83 @@ const LaunchForm = () => {
         .test("is-eth-address", "Invalid address", (value) =>
           ethAddressRegex.test(value)
         ),
-      chain: Yup.string()
-        .required("This field is required")
-        .oneOf(["BNB", "BNB1", "BNB2"], "Invalid option selected"),
+      chain: Yup.string().required("This field is required"),
     }),
-    onSubmit: (values, { setSubmitting }) => {
-      console.log("values", values);
+    onSubmit: async (values, { setSubmitting }) => {
+      // values.currentAddress = await currentAddress;
+      // const { data } = await axios.post("/api/deploy", values);
+      // console.log("data", data);
+      // deployedToken.current = data;
+      // setSubmitting(false);
+
+      if (!currentAddress) {
+        alert("Please connect your wallet first!");
+        return;
+      }
+
+      const networkMap: { [key: string]: bigint } = {
+        BNB_TEST: 97n,
+        BNB_MAIN: 56n,
+        HARDHAT: 1337n,
+        BASE_MAIN: 8453n,
+      };
+
+      const selectedChainId = networkMap[values.chain];
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const walletNetwork = await provider.getNetwork();
+
+      if (walletNetwork.chainId !== selectedChainId) {
+        alert(
+          `Change your wallet network to match deployment network ${values.chain}.`
+        );
+        setSubmitting(false);
+        return;
+      }
+      const signer = await provider.getSigner();
+
+      const contractABI = CoinshitterArtifact.abi;
+      const contractBytecode = CoinshitterArtifact.bytecode;
+
+      const factory = new ethers.ContractFactory(
+        contractABI,
+        contractBytecode,
+        signer
+      );
+
+      try {
+        const contract = await factory.deploy(/* constructor arguments */);
+        await contract.waitForDeployment();
+
+        deployedToken.current = {
+          date: new Date().toISOString(),
+          deployedContract: await contract.getAddress(),
+          deployerAddress: signer.address,
+          network: values.chain,
+        };
+      } catch (error) {
+        console.error("Error deploying contract:", error);
+      }
+
       setSubmitting(false);
     },
   });
+
+  if (!currentAddress) {
+    return (
+      <Flex
+        height="10vh"
+        justifyContent="center"
+        alignItems="center"
+        textAlign="center"
+        paddingTop="10rem"
+      >
+        <Badge variant="outline" p="2">
+          <Text fontSize="2xl">Connect your wallet to deploy a token.</Text>
+        </Badge>
+      </Flex>
+    );
+  }
 
   return (
     <Box p={4} maxWidth="500px" mx="auto">
@@ -157,9 +243,10 @@ const LaunchForm = () => {
             <FormLabel htmlFor="chain">Deployment chain</FormLabel>
             <InputGroup>
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BNB">BNB - Binance Smart Chain</option>
-                <option value="BNB1">BNB - Binance Smart Chain</option>
-                <option value="BNB2">BNB - Binance Smart Chain</option>
+                <option value="BNB_TEST">BNB - Testnet</option>
+                <option value="BNB_MAIN">BNB - Mainnet BSC</option>
+                <option value="HARDHAT">Hardhat</option>
+                <option value="BASE_MAIN">Base mainnet</option>
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (
@@ -200,6 +287,21 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
+          {deployedToken.current && (
+            <Badge variant="outline" p="2">
+              <Text fontSize="sm" color="gray.500">
+                <b>Deployed contract:</b>{" "}
+                {deployedToken.current?.deployedContract}
+                <br />
+                <b>Deployer address:</b>{" "}
+                {deployedToken.current?.deployerAddress}
+                <br />
+                <b>Network:</b> {deployedToken.current?.network}
+                <br />
+                <b>Date:</b> {deployedToken.current?.date}
+              </Text>
+            </Badge>
+          )}
         </VStack>
       </form>
     </Box>

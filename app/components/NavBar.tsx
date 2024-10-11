@@ -5,15 +5,41 @@ import {
   HStack,
   Image,
   Spacer,
+  Text,
   useColorMode,
 } from "@chakra-ui/react";
+import { ethers } from "ethers";
 import Link from "next/link";
+import { useEffect } from "react";
 import logo from "../../public/logo.png";
+import useGlobalStore from "../state/store";
+import AddressBadge from "./AddressBadge";
 import ColorModeSwitch from "./ColorModeSwitch";
-import ConnectWalletButton from "./ConnectWalletButton";
+import ConnectWallet from "./ConnectWalletButton";
 
 const NavBar = () => {
   const { colorMode } = useColorMode();
+  const { txBeingSent, currentBalance, setCurrentBalance, currentConnection } =
+    useGlobalStore();
+
+  //console.log("currentConnection", currentConnection);
+  useEffect(() => {
+    (async () => {
+      //console.log("refresh triggered");
+      if (currentConnection?.provider && currentConnection?.signer) {
+        setCurrentBalance(
+          (
+            await currentConnection.provider.getBalance(
+              currentConnection.signer.getAddress(),
+              await currentConnection.provider.getBlockNumber()
+            )
+          ).toString()
+        );
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConnection, txBeingSent]);
+
   return (
     <Flex
       as="nav"
@@ -52,7 +78,13 @@ const NavBar = () => {
       <Spacer />
       <Box>
         <HStack gap={10} fontWeight="bold">
-          <ConnectWalletButton />
+          {currentBalance && (
+            <Text fontSize="xs"> {ethers.formatEther(currentBalance)}</Text>
+          )}
+          {currentConnection?.signer && (
+            <AddressBadge address={currentConnection.signer.address} />
+          )}
+          {!currentConnection?.signer && <ConnectWallet />}
           <ColorModeSwitch />
         </HStack>
       </Box>
@@ -61,3 +93,12 @@ const NavBar = () => {
 };
 
 export default NavBar;
+
+// {txBeingSent && <WaitingForTransactionMessage txHash={txBeingSent} />}
+
+// {transactionError && (
+//   <TransactionErrorMessage
+//     message={_getRpcErrorMessage(transactionError)}
+//     dismiss={_dismissTransactionError}
+//   />
+// )}
