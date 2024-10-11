@@ -1,6 +1,6 @@
 import { Button, useColorModeValue } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import React, { use, useEffect } from "react";
+import React, { useEffect } from "react";
 import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
 
@@ -29,7 +29,7 @@ const ConnectWalletButton: React.FC = () => {
       const parsedConnection = JSON.parse(savedConnection);
       _initialize(parsedConnection.selectedAccount);
     }
-  }, [currentConnection]);
+  });
 
   useEffect(() => {
     const handleAccountsChanged = async ([newAccount]: [
@@ -49,7 +49,7 @@ const ConnectWalletButton: React.FC = () => {
       console.log("chain is changed");
       _resetState();
     });
-  }, []);
+  });
 
   const _connectWallet = async () => {
     if (window.ethereum === undefined) {

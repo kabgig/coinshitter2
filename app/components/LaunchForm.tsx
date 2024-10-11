@@ -13,7 +13,6 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import axios from "axios";
 import { useFormik } from "formik";
 import { useRef } from "react";
 import * as Yup from "yup";
@@ -34,7 +33,7 @@ const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const deployedToken = useRef<DeployedTokenInfo>();
-  const { currentConnection, setCurrentConnection } = useGlobalStore();
+  const { currentConnection } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
 
   const formik = useFormik({

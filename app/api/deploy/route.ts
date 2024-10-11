@@ -5,7 +5,7 @@ import path from "path";
 export async function POST(request: NextRequest): Promise<void | Response> {
   const body = await request.json();
   const currentAddress = body.currentAddress;
-  const chain = body.chain;
+  //const chain = body.chain;
   console.log("currentAddress", currentAddress);
   const network = "bnbtestnet";
 
