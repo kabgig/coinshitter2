@@ -1,5 +1,6 @@
 "use client";
 import {
+  Badge,
   Box,
   Button,
   Flex,
@@ -23,6 +24,7 @@ import { ethers } from "ethers";
 import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 
 type DeployedTokenInfo = {
+  date: string;
   deployedContract: string;
   deployerAddress: string;
   network: string;
@@ -32,7 +34,7 @@ const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const deployedToken = useRef<DeployedTokenInfo>();
-  const { currentConnection } = useGlobalStore();
+  const { currentConnection, setCurrentConnection } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
 
   const formik = useFormik({
@@ -97,15 +99,12 @@ const LaunchForm = () => {
 
       if (walletNetwork.chainId !== selectedChainId) {
         alert(
-          `Your wallet ${walletNetwork.name} network and deployment network ${values.chain} do not match.`
+          `Change your wallet network to match deployment network ${values.chain}.`
         );
         setSubmitting(false);
         return;
       }
       const signer = await provider.getSigner();
-      //
-      console.log(" provider.getNetwork()", provider.getNetwork());
-      console.log("signer", signer);
 
       const contractABI = CoinshitterArtifact.abi;
       const contractBytecode = CoinshitterArtifact.bytecode;
@@ -116,14 +115,21 @@ const LaunchForm = () => {
         signer
       );
 
-      // try {
-      //   const contract = await factory.deploy(/* constructor arguments */);
-      //   await contract.waitForDeployment();
-      //   console.log("Contract deployed at:", contract.getAddress());
-      // } catch (error) {
-      //   console.error("Error deploying contract:", error);
-      // }
-      // setSubmitting(false);
+      try {
+        const contract = await factory.deploy(/* constructor arguments */);
+        await contract.waitForDeployment();
+
+        deployedToken.current = {
+          date: new Date().toISOString(),
+          deployedContract: await contract.getAddress(),
+          deployerAddress: signer.address,
+          network: values.chain,
+        };
+      } catch (error) {
+        console.error("Error deploying contract:", error);
+      }
+
+      setSubmitting(false);
     },
   });
 
@@ -136,9 +142,9 @@ const LaunchForm = () => {
         textAlign="center"
         paddingTop="10rem"
       >
-        <Text fontSize="2xl">
-          Please connect your wallet to deploy a token.
-        </Text>
+        <Badge variant="outline" p="2">
+          <Text fontSize="2xl">Connect your wallet to deploy a token.</Text>
+        </Badge>
       </Flex>
     );
   }
@@ -283,15 +289,19 @@ const LaunchForm = () => {
             Deploy token
           </Button>
           {deployedToken.current && (
-            <Text fontSize="sm" color="gray.500">
-              <b>Deployed contract:</b>{" "}
-              {deployedToken.current?.deployedContract}
-              <br />
-              <b>Deployer address:</b> {deployedToken.current?.deployerAddress}
-              <br />
-              <b>Network:</b> {deployedToken.current?.network}
-              <br />
-            </Text>
+            <Badge variant="outline" p="2">
+              <Text fontSize="sm" color="gray.500">
+                <b>Deployed contract:</b>{" "}
+                {deployedToken.current?.deployedContract}
+                <br />
+                <b>Deployer address:</b>{" "}
+                {deployedToken.current?.deployerAddress}
+                <br />
+                <b>Network:</b> {deployedToken.current?.network}
+                <br />
+                <b>Date:</b> {deployedToken.current?.date}
+              </Text>
+            </Badge>
           )}
         </VStack>
       </form>

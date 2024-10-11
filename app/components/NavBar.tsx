@@ -22,8 +22,10 @@ const NavBar = () => {
   const { txBeingSent, currentBalance, setCurrentBalance, currentConnection } =
     useGlobalStore();
 
+  //console.log("currentConnection", currentConnection);
   useEffect(() => {
     (async () => {
+      //console.log("refresh triggered");
       if (currentConnection?.provider && currentConnection?.signer) {
         setCurrentBalance(
           (

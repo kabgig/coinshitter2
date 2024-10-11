@@ -1,6 +1,6 @@
 import { Button, useColorModeValue } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import React from "react";
+import React, { useEffect } from "react";
 import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
 
@@ -17,12 +17,19 @@ const ConnectWalletButton: React.FC = () => {
     setCurrentConnection,
     currentConnection,
     setTransactionError,
-    setCurrentUserAddress,
     setTxBeingSent,
     setCurrentBalance,
     setIsOwner,
   } = useGlobalStore();
   const borderColor = useColorModeValue("black", "white");
+
+  useEffect(() => {
+    const savedConnection = localStorage.getItem("currentConnection");
+    if (savedConnection) {
+      const parsedConnection = JSON.parse(savedConnection);
+      _initialize(parsedConnection.selectedAccount);
+    }
+  }, [currentConnection]);
 
   const _connectWallet = async () => {
     if (window.ethereum === undefined) {
@@ -41,8 +48,10 @@ const ConnectWalletButton: React.FC = () => {
     await _initialize(ethers.getAddress(selectedAccount));
 
     window.ethereum.on(
+      //listener нужно делать в useEffect, сейчас не срабатывает при изменении аккаунта в metamask
       "accountsChanged",
       async ([newAccount]: [newAccount: string]) => {
+        console.log("account is changed");
         if (newAccount === undefined) {
           return _resetState();
         }
@@ -60,11 +69,14 @@ const ConnectWalletButton: React.FC = () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner(selectedAccount);
 
-    setCurrentConnection({
+    const connection = {
       ...currentConnection,
       provider,
       signer,
-    });
+    };
+    setCurrentConnection(connection);
+    console.log("connectionChanged", connection);
+    localStorage.setItem("currentConnection", JSON.stringify(connection));
   };
 
   const _checkNetwork = async (): Promise<boolean> => {
@@ -77,7 +89,6 @@ const ConnectWalletButton: React.FC = () => {
       chosenChainId === BNB_TESTNET_ID ||
       chosenChainId === BASE_MAINNET_ID
     ) {
-      console.log("CHAIN IS OK");
       return true;
     }
     setNetworkError("Please connect to Hardhat network (localhost:8545)");
