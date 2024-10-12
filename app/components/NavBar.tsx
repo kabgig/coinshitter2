@@ -16,16 +16,21 @@ import useGlobalStore from "../state/store";
 import AddressBadge from "./AddressBadge";
 import ColorModeSwitch from "./ColorModeSwitch";
 import ConnectWallet from "./ConnectWalletButton";
+import networkIds from "../configs/networkIds";
 
 const NavBar = () => {
   const { colorMode } = useColorMode();
-  const { txBeingSent, currentBalance, setCurrentBalance, currentConnection } =
-    useGlobalStore();
+  const {
+    txBeingSent,
+    currentBalance,
+    setCurrentBalance,
+    currentConnection,
+    currentWalletNetwork,
+    setCurrentWalletNetwork,
+  } = useGlobalStore();
 
-  //console.log("currentConnection", currentConnection);
   useEffect(() => {
     (async () => {
-      //console.log("refresh triggered");
       if (currentConnection?.provider && currentConnection?.signer) {
         setCurrentBalance(
           (
@@ -39,6 +44,21 @@ const NavBar = () => {
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentConnection, txBeingSent]);
+
+  useEffect(() => {
+    const fetchNetwork = async () => {
+      if (currentConnection?.provider) {
+        const chainId = await currentConnection.provider.send(
+          "eth_chainId",
+          []
+        );
+        setCurrentWalletNetwork(networkIds.get(chainId));
+      }
+    };
+
+    fetchNetwork();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentConnection]);
 
   return (
     <Flex
@@ -78,8 +98,13 @@ const NavBar = () => {
       <Spacer />
       <Box>
         <HStack gap={10} fontWeight="bold">
+          {currentConnection && currentWalletNetwork && (
+            <Text fontSize="xs"> {currentWalletNetwork}</Text>
+          )}
           {currentBalance && (
-            <Text fontSize="xs"> {ethers.formatEther(currentBalance)}</Text>
+            <Text fontSize="xs">
+              {ethers.formatEther(currentBalance).slice(0, 7)}
+            </Text>
           )}
           {currentConnection?.signer && (
             <AddressBadge address={currentConnection.signer.address} />

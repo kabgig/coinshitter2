@@ -16,6 +16,8 @@ interface globalStore {
   setIsOwner: (isOwner: boolean) => void;
   currentUserAddress: string | undefined;
   setCurrentUserAddress: (currentUserAddress: string | undefined) => void;
+  currentWalletNetwork: string | undefined;
+  setCurrentWalletNetwork: (currentNetwork: string | undefined) => void;
 }
 
 const useGlobalStore = create<globalStore>((set) => ({
@@ -35,6 +37,9 @@ const useGlobalStore = create<globalStore>((set) => ({
   currentUserAddress: undefined,
   setCurrentUserAddress: (currentUserAddress) =>
     set({ currentUserAddress: currentUserAddress }),
+  currentWalletNetwork: undefined,
+  setCurrentWalletNetwork: (currentNetwork) =>
+    set({ currentWalletNetwork: currentNetwork }),
 }));
 
 export default useGlobalStore;
