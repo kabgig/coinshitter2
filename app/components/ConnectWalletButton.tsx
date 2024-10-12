@@ -1,14 +1,9 @@
 import { Button, useColorModeValue } from "@chakra-ui/react";
 import { ethers } from "ethers";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
-
-const HARDHAT_NETWORK_ID = "0x539";
-const BNB_TESTNET_ID = "0x61";
-const BASE_MAINNET_ID = "0x2105";
-
-// declare let window: any;
+import networkIds from "../configs/networkIds";
 
 const ConnectWalletButton: React.FC = () => {
   const {
@@ -20,14 +15,24 @@ const ConnectWalletButton: React.FC = () => {
     setTxBeingSent,
     setCurrentBalance,
     setIsOwner,
+    setCurrentWalletNetwork,
   } = useGlobalStore();
   const borderColor = useColorModeValue("black", "white");
+  const [isRequestPending, setIsRequestPending] = useState(false);
 
   useEffect(() => {
     const savedConnection = localStorage.getItem("currentConnection");
     if (savedConnection) {
       const parsedConnection = JSON.parse(savedConnection);
-      _initialize(parsedConnection.selectedAccount);
+      if (window.ethereum) {
+        window.ethereum
+          .request({ method: "eth_accounts" })
+          .then((accounts: string[]) => {
+            if (accounts.length > 0) {
+              _initialize(parsedConnection.selectedAccount);
+            }
+          });
+      }
     }
   });
 
@@ -35,19 +40,16 @@ const ConnectWalletButton: React.FC = () => {
     const handleAccountsChanged = async ([newAccount]: [
       newAccount: string
     ]) => {
-      console.log("account is changed");
       if (newAccount === undefined) {
         return _resetState();
       }
-
       await _initialize(ethers.getAddress(newAccount));
     };
 
     window.ethereum.on("accountsChanged", handleAccountsChanged);
-
     window.ethereum.on("chainChanged", () => {
-      console.log("chain is changed");
       _resetState();
+      _setupNetwork();
     });
   });
 
@@ -57,13 +59,24 @@ const ConnectWalletButton: React.FC = () => {
       return;
     }
 
-    if (!(await _checkNetwork())) return;
+    if (isRequestPending) {
+      setNetworkError("Please wait for the previous request to complete.");
+      return;
+    }
+    setIsRequestPending(true);
 
-    const [selectedAccount] = await window.ethereum.request({
-      method: "eth_requestAccounts",
-    });
+    try {
+      const [selectedAccount] = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
 
-    await _initialize(ethers.getAddress(selectedAccount));
+      await _initialize(ethers.getAddress(selectedAccount));
+      await _setupNetwork();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsRequestPending(false);
+    }
   };
 
   const _initialize = async (selectedAccount: string) => {
@@ -79,20 +92,11 @@ const ConnectWalletButton: React.FC = () => {
     localStorage.setItem("currentConnection", JSON.stringify(connection));
   };
 
-  const _checkNetwork = async (): Promise<boolean> => {
+  const _setupNetwork = async () => {
     const chosenChainId = await window.ethereum.request({
       method: "eth_chainId",
     });
-
-    if (
-      chosenChainId === HARDHAT_NETWORK_ID ||
-      chosenChainId === BNB_TESTNET_ID ||
-      chosenChainId === BASE_MAINNET_ID
-    ) {
-      return true;
-    }
-    setNetworkError("Please connect to Hardhat network (localhost:8545)");
-    return false;
+    setCurrentWalletNetwork(networkIds.get(chosenChainId));
   };
 
   const _resetState = () => {
@@ -101,6 +105,7 @@ const ConnectWalletButton: React.FC = () => {
     setTxBeingSent(false);
     setCurrentBalance(undefined);
     setIsOwner(false);
+    setCurrentWalletNetwork(undefined);
     setCurrentConnection({
       provider: undefined,
       signer: undefined,

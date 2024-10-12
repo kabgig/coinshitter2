@@ -73,28 +73,25 @@ const LaunchForm = () => {
       chain: Yup.string().required("This field is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
-      // values.currentAddress = await currentAddress;
-      // const { data } = await axios.post("/api/deploy", values);
-      // console.log("data", data);
-      // deployedToken.current = data;
-      // setSubmitting(false);
-
       if (!currentAddress) {
         alert("Please connect your wallet first!");
         return;
       }
 
       const networkMap: { [key: string]: bigint } = {
-        BNB_TEST: 97n,
-        BNB_MAIN: 56n,
+        BNB_TESTNET: 97n,
+        BNB_MAINNET: 56n,
         HARDHAT: 1337n,
-        BASE_MAIN: 8453n,
+        BASE_MAINNET: 8453n,
+        BASE_TESTNET_SEPOLIA: 84532n,
       };
 
       const selectedChainId = networkMap[values.chain];
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
+      console.log("walletNetwork", walletNetwork);
+      console.log("selectedChainId", selectedChainId);
 
       if (walletNetwork.chainId !== selectedChainId) {
         alert(
@@ -243,10 +240,13 @@ const LaunchForm = () => {
             <FormLabel htmlFor="chain">Deployment chain</FormLabel>
             <InputGroup>
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BNB_TEST">BNB - Testnet</option>
-                <option value="BNB_MAIN">BNB - Mainnet BSC</option>
+                <option value="BASE_MAINNET">Base Mainnet</option>
+                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
+                <option value="BASE_TESTNET_SEPOLIA">
+                  Base Testnet Sepolia
+                </option>
+                <option value="BNB_TESTNET">BNB Testnet</option>
                 <option value="HARDHAT">Hardhat</option>
-                <option value="BASE_MAIN">Base mainnet</option>
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (
