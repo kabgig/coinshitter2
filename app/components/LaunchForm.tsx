@@ -74,6 +74,7 @@ const LaunchForm = () => {
       chain: Yup.string().required("This field is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
+      deployedToken.current = undefined;
       if (!currentAddress) {
         alert("Please connect your wallet first!");
         return;
@@ -89,6 +90,9 @@ const LaunchForm = () => {
 
       const selectedChainId = networkMap[values.chain];
       const totalSupply = values.totalSupply;
+      const marketingAddress = values.marketingAddress;
+      console.log("totalSupply", totalSupply);
+      console.log("marketingAddress", marketingAddress);
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
@@ -101,7 +105,6 @@ const LaunchForm = () => {
         return;
       }
       const signer = await provider.getSigner();
-
       const contractABI = CoinshitterArtifact.abi;
       const contractBytecode = CoinshitterArtifact.bytecode;
 
@@ -112,8 +115,19 @@ const LaunchForm = () => {
       );
 
       try {
-        const contract = await factory.deploy(totalSupply);
+        const contract = await factory.deploy(totalSupply, marketingAddress);
         await contract.waitForDeployment();
+
+        //make verification here
+        const result = await axios.post("/api/verify", {
+          deployedContractAddress: await contract.getAddress(),
+          totalSupply: totalSupply,
+          marketingAddress: marketingAddress,
+        });
+
+        console.log("result", result);
+        // const parsedResult = JSON.parse(result.data);
+        // console.log("result", parsedResult);
 
         deployedToken.current = {
           // add compiler version, Compiler Type, and optimization
@@ -124,12 +138,6 @@ const LaunchForm = () => {
           deployerAddress: signer.address,
           network: values.chain,
         };
-
-        //make verification here
-        const result = await axios.post("/api/verify", {
-          deployedContractAddress: await contract.getAddress(),
-          totalSupply: totalSupply,
-        });
       } catch (error) {
         console.error("Error deploying contract:", error);
       }
@@ -297,6 +305,7 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
+          {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
             <Badge variant="outline" p="2">
               <Text fontSize="sm" color="gray.500">

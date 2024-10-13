@@ -12,6 +12,7 @@ export async function POST(request: NextRequest) {
   const deployedContractAddress = body.deployedContractAddress;
   const contract = "contracts/Coinshitter.sol:Coinshitter";
   const totalSupply = body.totalSupply;
+  const marketingAddress = body.marketingAddress;
 
   return new Promise((resolve, reject) => {
     const verificationScriptPath = path.resolve(
@@ -29,6 +30,7 @@ export async function POST(request: NextRequest) {
           totalSupply,
           //chain: body.chain,
           contract,
+          marketingAddress,
         },
       },
       (error, stdout, stderr) => {
@@ -41,14 +43,16 @@ export async function POST(request: NextRequest) {
         console.log("\nScript output:\n\n" + stdout);
 
         const jsonMatch = stdout.match(/\{.*?\}/);
-        console.log("jsonMatch", jsonMatch);
+        const urlMatch = stdout.match(/https:\/\/\S+/);
+        const verifiedUrl = urlMatch ? urlMatch[0] : null;
 
         if (jsonMatch) {
           try {
             const jsonOutput = JSON.parse(jsonMatch[0]);
+            if (verifiedUrl) jsonOutput.verifiedUrl = verifiedUrl;
+            console.log("jsonOutput", jsonOutput);
             resolve(NextResponse.json(jsonOutput));
           } catch (parseError) {
-            console.error(`Error parsing JSON output: ${parseError}`);
             reject(
               NextResponse.json(
                 { error: "Failed to parse JSON output" },
