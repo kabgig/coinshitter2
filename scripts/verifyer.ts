@@ -18,8 +18,9 @@ export default async function main() {
   try {
     await hre.run("verify:verify", {
       address: deployedContractAddress,
-      constructorArguments: [],
+      constructorArguments: [totalSupply, marketingAddress],
     });
+    //на крайняк можно текстовый файл билдить с уникальным название контракта
     console.log(
       JSON.stringify({ status: "success", message: "Verification successful" })
     );
