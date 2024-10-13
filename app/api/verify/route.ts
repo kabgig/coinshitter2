@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
             const jsonOutput = JSON.parse(jsonMatch[0]);
             if (verifiedUrl) jsonOutput.verifiedUrl = verifiedUrl;
             console.log("jsonOutput", jsonOutput);
-            resolve(NextResponse.json(jsonOutput));
+            resolve(NextResponse.json(jsonOutput, { status: 201 }));
           } catch (parseError) {
             reject(
               NextResponse.json(

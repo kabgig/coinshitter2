@@ -9,6 +9,7 @@ import {
   FormLabel,
   Input,
   InputGroup,
+  Link,
   Select,
   Text,
   VStack,
@@ -28,6 +29,7 @@ type DeployedTokenInfo = {
   deployedContract: string;
   deployerAddress: string;
   network: string;
+  contractUrl: string;
 };
 
 const LaunchForm = () => {
@@ -74,6 +76,7 @@ const LaunchForm = () => {
       chain: Yup.string().required("This field is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
       deployedToken.current = undefined;
       if (!currentAddress) {
         alert("Please connect your wallet first!");
@@ -118,14 +121,15 @@ const LaunchForm = () => {
         const contract = await factory.deploy(totalSupply, marketingAddress);
         await contract.waitForDeployment();
 
-        //make verification here
         const result = await axios.post("/api/verify", {
           deployedContractAddress: await contract.getAddress(),
           totalSupply: totalSupply,
           marketingAddress: marketingAddress,
         });
 
-        console.log("result", result);
+        console.log("Verification result:", result.data);
+
+        //console.log("result", result);
         // const parsedResult = JSON.parse(result.data);
         // console.log("result", parsedResult);
 
@@ -137,12 +141,14 @@ const LaunchForm = () => {
           deployedContract: await contract.getAddress(),
           deployerAddress: signer.address,
           network: values.chain,
+          contractUrl: result.data.verifiedUrl,
         };
       } catch (error) {
         console.error("Error deploying contract:", error);
+      } finally {
+        console.log("setsubmitting false");
+        setSubmitting(false);
       }
-
-      setSubmitting(false);
     },
   });
 
@@ -167,48 +173,24 @@ const LaunchForm = () => {
       <form onSubmit={formik.handleSubmit}>
         <VStack spacing={4}>
           <FormControl
-            id="ownerWalletAddress"
-            isInvalid={
-              formik.touched.ownerWalletAddress &&
-              !!formik.errors.ownerWalletAddress
-            }
+            id="chain"
+            isInvalid={formik.touched.chain && !!formik.errors.chain}
           >
-            <FormLabel htmlFor="ownerWalletAddress">
-              Owner Wallet Address
-            </FormLabel>
+            <FormLabel htmlFor="chain">Network</FormLabel>
             <InputGroup>
-              <Input
-                placeholder="Enter owner wallet address"
-                {...formik.getFieldProps("ownerWalletAddress")}
-              />
-              <FormTooltip text={translate("fields.ownerWalletAddress")} />
+              {/* //TODO separation of the testnets from mainnets */}
+              <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
+                <option value="BASE_MAINNET">Base Mainnet</option>
+                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
+                <option value="BASE_TESTNET_SEPOLIA">
+                  Base Testnet Sepolia
+                </option>
+                <option value="BNB_TESTNET">BNB Testnet</option>
+                <option value="HARDHAT">Hardhat</option>
+              </Select>
             </InputGroup>
-
-            {formik.touched.ownerWalletAddress &&
-            formik.errors.ownerWalletAddress ? (
-              <FormErrorMessage>
-                {formik.errors.ownerWalletAddress}
-              </FormErrorMessage>
-            ) : null}
-          </FormControl>
-
-          <FormControl
-            id="totalSupply"
-            isInvalid={
-              formik.touched.totalSupply && !!formik.errors.totalSupply
-            }
-          >
-            <FormLabel htmlFor="totalSupply">Total supply</FormLabel>
-            <InputGroup>
-              <Input
-                placeholder="Total supply"
-                {...formik.getFieldProps("totalSupply")}
-              />
-              <FormTooltip text={translate("fields.totalSupply")} />
-            </InputGroup>
-
-            {formik.touched.totalSupply && formik.errors.totalSupply ? (
-              <FormErrorMessage>{formik.errors.totalSupply}</FormErrorMessage>
+            {formik.touched.chain && formik.errors.chain ? (
+              <FormErrorMessage>{formik.errors.chain}</FormErrorMessage>
             ) : null}
           </FormControl>
 
@@ -251,24 +233,48 @@ const LaunchForm = () => {
           </FormControl>
 
           <FormControl
-            id="chain"
-            isInvalid={formik.touched.chain && !!formik.errors.chain}
+            id="totalSupply"
+            isInvalid={
+              formik.touched.totalSupply && !!formik.errors.totalSupply
+            }
           >
-            <FormLabel htmlFor="chain">Deployment chain</FormLabel>
+            <FormLabel htmlFor="totalSupply">Total supply</FormLabel>
             <InputGroup>
-              {/* //TODO separation of the testnets from mainnets */}
-              <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BASE_MAINNET">Base Mainnet</option>
-                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
-                <option value="BASE_TESTNET_SEPOLIA">
-                  Base Testnet Sepolia
-                </option>
-                <option value="BNB_TESTNET">BNB Testnet</option>
-                <option value="HARDHAT">Hardhat</option>
-              </Select>
+              <Input
+                placeholder="Total supply"
+                {...formik.getFieldProps("totalSupply")}
+              />
+              <FormTooltip text={translate("fields.totalSupply")} />
             </InputGroup>
-            {formik.touched.chain && formik.errors.chain ? (
-              <FormErrorMessage>{formik.errors.chain}</FormErrorMessage>
+
+            {formik.touched.totalSupply && formik.errors.totalSupply ? (
+              <FormErrorMessage>{formik.errors.totalSupply}</FormErrorMessage>
+            ) : null}
+          </FormControl>
+
+          <FormControl
+            id="ownerWalletAddress"
+            isInvalid={
+              formik.touched.ownerWalletAddress &&
+              !!formik.errors.ownerWalletAddress
+            }
+          >
+            <FormLabel htmlFor="ownerWalletAddress">
+              Owner Wallet Address
+            </FormLabel>
+            <InputGroup>
+              <Input
+                placeholder="Enter owner wallet address"
+                {...formik.getFieldProps("ownerWalletAddress")}
+              />
+              <FormTooltip text={translate("fields.ownerWalletAddress")} />
+            </InputGroup>
+
+            {formik.touched.ownerWalletAddress &&
+            formik.errors.ownerWalletAddress ? (
+              <FormErrorMessage>
+                {formik.errors.ownerWalletAddress}
+              </FormErrorMessage>
             ) : null}
           </FormControl>
 
@@ -309,15 +315,28 @@ const LaunchForm = () => {
           {deployedToken.current && (
             <Badge variant="outline" p="2">
               <Text fontSize="sm" color="gray.500">
-                <b>Deployed contract:</b>{" "}
-                {deployedToken.current?.deployedContract}
+                <b>Deployed token: </b>{" "}
+                <u>
+                  <Link
+                    target="_blank"
+                    href={deployedToken.current?.contractUrl}
+                  >
+                    {deployedToken.current?.deployedContract}
+                  </Link>
+                </u>
                 <br />
-                <b>Deployer address:</b>{" "}
-                {deployedToken.current?.deployerAddress}
+                <b>Token owner: </b> {deployedToken.current?.deployerAddress}
                 <br />
-                <b>Network:</b> {deployedToken.current?.network}
+                <b>Token name: </b>
                 <br />
-                <b>Date:</b> {deployedToken.current?.date}
+                <b>Token symbol: </b>
+                <br />
+                <b>Token amount: </b>
+                <br />
+                <b>Network: </b> {deployedToken.current?.network}
+                <br />
+                <b>Date: </b> {deployedToken.current?.date}
+                <br />
               </Text>
             </Badge>
           )}

@@ -92,7 +92,7 @@ const NavBar = () => {
           </Link>
           <Link href="/">Home</Link>
           <Link href="/launch">Launch</Link>
-          <Link href="/faq">FAQ</Link>
+          {/* <Link href="/faq">FAQ</Link> */}
         </HStack>
       </Box>
       <Spacer />
