@@ -21,6 +21,7 @@ import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
 import { ethers } from "ethers";
 import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+import axios from "axios";
 
 type DeployedTokenInfo = {
   date: string;
@@ -87,15 +88,14 @@ const LaunchForm = () => {
       };
 
       const selectedChainId = networkMap[values.chain];
+      const totalSupply = values.totalSupply;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
-      console.log("walletNetwork", walletNetwork);
-      console.log("selectedChainId", selectedChainId);
 
       if (walletNetwork.chainId !== selectedChainId) {
         alert(
-          `Change your wallet network to match deployment network ${values.chain}.`
+          `Change wallet network to match deployment network ${values.chain}.`
         );
         setSubmitting(false);
         return;
@@ -112,15 +112,24 @@ const LaunchForm = () => {
       );
 
       try {
-        const contract = await factory.deploy(/* constructor arguments */);
+        const contract = await factory.deploy(totalSupply);
         await contract.waitForDeployment();
 
         deployedToken.current = {
+          // add compiler version, Compiler Type, and optimization
+          // SPDX-License-Identifier: MIT
+          // pragma solidity ^0.8.24;
           date: new Date().toISOString(),
           deployedContract: await contract.getAddress(),
           deployerAddress: signer.address,
           network: values.chain,
         };
+
+        //make verification here
+        const result = await axios.post("/api/verify", {
+          deployedContractAddress: await contract.getAddress(),
+          totalSupply: totalSupply,
+        });
       } catch (error) {
         console.error("Error deploying contract:", error);
       }
@@ -239,6 +248,7 @@ const LaunchForm = () => {
           >
             <FormLabel htmlFor="chain">Deployment chain</FormLabel>
             <InputGroup>
+              {/* //TODO separation of the testnets from mainnets */}
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
                 <option value="BASE_MAINNET">Base Mainnet</option>
                 <option value="BNB_MAINNET">BNB Mainnet BSC</option>

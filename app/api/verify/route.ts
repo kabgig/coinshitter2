@@ -1,26 +1,34 @@
 import { exec } from "child_process";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
+import dotenv from "dotenv";
+import hre from "hardhat";
 
-export async function POST(request: NextRequest): Promise<void | Response> {
+// Load environment variables from .env file
+dotenv.config();
+
+export async function POST(request: NextRequest) {
   const body = await request.json();
-  const currentAddress = body.currentAddress;
-  const network = "bnbtestnet";
+  const deployedContractAddress = body.deployedContractAddress;
+  const contract = "contracts/Coinshitter.sol:Coinshitter";
+  const totalSupply = body.totalSupply;
 
   return new Promise((resolve, reject) => {
-    const deployScriptPath = path.resolve(process.cwd(), "scripts/deployer.ts");
+    const verificationScriptPath = path.resolve(
+      process.cwd(),
+      "scripts/verifyer.ts"
+    );
     exec(
-      `npx hardhat run ${deployScriptPath} --network ${network}`,
+      `npx hardhat run ${verificationScriptPath} --network basesepolia`,
       {
         env: {
           ...process.env,
-          ownerWalletAddress: body.ownerWalletAddress,
-          totalSupply: body.totalSupply,
-          tokenName: body.tokenName,
-          tokenSymbol: body.tokenSymbol,
-          marketingAddress: body.marketingAddress,
-          chain: body.chain,
-          currentAddress,
+          address: deployedContractAddress,
+          //tokenName: body.tokenName,
+          //tokenSymbol: body.tokenSymbol,
+          totalSupply,
+          //chain: body.chain,
+          contract,
         },
       },
       (error, stdout, stderr) => {
@@ -33,6 +41,7 @@ export async function POST(request: NextRequest): Promise<void | Response> {
         console.log("\nScript output:\n\n" + stdout);
 
         const jsonMatch = stdout.match(/\{.*?\}/);
+        console.log("jsonMatch", jsonMatch);
 
         if (jsonMatch) {
           try {
@@ -58,4 +67,5 @@ export async function POST(request: NextRequest): Promise<void | Response> {
       }
     );
   });
+  //return NextResponse.json("Verification ID");
 }
