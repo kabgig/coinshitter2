@@ -339,6 +339,7 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
+          {/* логирование процесса в интерфейсе */}
           {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
             <Badge variant="outline" p="2">
