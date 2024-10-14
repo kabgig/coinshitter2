@@ -33,6 +33,8 @@ type DeployedTokenInfo = {
   network: string;
   contractUrl: string;
   tokenSymbol: string;
+  tokenName: string;
+  totalSupply: number;
   decimals: number;
 };
 
@@ -73,7 +75,7 @@ const LaunchForm = () => {
 
   const formik = useFormik({
     initialValues: {
-      ownerWalletAddress: "",
+      decimals: 18,
       totalSupply: 1_000_000_000,
       tokenName: "",
       tokenSymbol: "",
@@ -82,11 +84,9 @@ const LaunchForm = () => {
       currentAddress: "",
     },
     validationSchema: Yup.object({
-      ownerWalletAddress: Yup.string()
+      decimals: Yup.number()
         .required("This field is required")
-        .test("is-eth-address", "Invalid address", (value) =>
-          ethAddressRegex.test(value)
-        ),
+        .min(0, "Decimals must be zero or positive whole number"),
       totalSupply: Yup.number()
         .required("This field is required")
         .min(1, "Total supply must be more than 1")
@@ -175,6 +175,8 @@ const LaunchForm = () => {
           network: values.chain,
           contractUrl: result.data.verifiedUrl,
           tokenSymbol: values.tokenSymbol,
+          tokenName: values.tokenName,
+          totalSupply: totalSupply,
           decimals: 18,
         };
       } catch (error) {
@@ -287,28 +289,20 @@ const LaunchForm = () => {
           </FormControl>
 
           <FormControl
-            id="ownerWalletAddress"
-            isInvalid={
-              formik.touched.ownerWalletAddress &&
-              !!formik.errors.ownerWalletAddress
-            }
+            id="decimals"
+            isInvalid={formik.touched.decimals && !!formik.errors.decimals}
           >
-            <FormLabel htmlFor="ownerWalletAddress">
-              Owner Wallet Address
-            </FormLabel>
+            <FormLabel htmlFor="decimals">Decimals</FormLabel>
             <InputGroup>
               <Input
-                placeholder="Enter owner wallet address"
-                {...formik.getFieldProps("ownerWalletAddress")}
+                placeholder="Enter decimals, e.g. 18"
+                {...formik.getFieldProps("decimals")}
               />
-              <FormTooltip text={translate("fields.ownerWalletAddress")} />
+              <FormTooltip text={translate("fields.decimals")} />
             </InputGroup>
 
-            {formik.touched.ownerWalletAddress &&
-            formik.errors.ownerWalletAddress ? (
-              <FormErrorMessage>
-                {formik.errors.ownerWalletAddress}
-              </FormErrorMessage>
+            {formik.touched.decimals && formik.errors.decimals ? (
+              <FormErrorMessage>{formik.errors.decimals}</FormErrorMessage>
             ) : null}
           </FormControl>
 
@@ -377,11 +371,13 @@ const LaunchForm = () => {
                 <br />
                 <b>Token owner: </b> {deployedToken.current?.deployerAddress}
                 <br />
-                <b>Token name: </b>
+                <b>Token name: </b> {deployedToken.current?.tokenName}
                 <br />
-                <b>Token symbol: </b>
+                <b>Token symbol: </b> {deployedToken.current?.tokenSymbol}
                 <br />
-                <b>Token amount: </b>
+                <b>Total supply: </b> {deployedToken.current?.totalSupply}
+                <br />
+                <b>Decimals: </b> {deployedToken.current?.decimals}
                 <br />
                 <b>Network: </b> {deployedToken.current?.network}
                 <br />
