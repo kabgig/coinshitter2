@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 // Load environment variables from .env file
 dotenv.config();
 
-export async function POST(request: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = await request.json();
   const deployedContractAddress = body.deployedContractAddress;
   const contract = "contracts/Coinshitter.sol:Coinshitter";
