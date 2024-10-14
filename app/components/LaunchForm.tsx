@@ -13,6 +13,7 @@ import {
   Select,
   Text,
   VStack,
+  Image,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
 import { useRef } from "react";
@@ -23,6 +24,7 @@ import FormTooltip from "./FormTooltip";
 import { ethers } from "ethers";
 import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 import axios from "axios";
+import metamask from "../../public/metamask.png";
 
 type DeployedTokenInfo = {
   date: string;
@@ -30,6 +32,8 @@ type DeployedTokenInfo = {
   deployerAddress: string;
   network: string;
   contractUrl: string;
+  tokenSymbol: string;
+  decimals: number;
 };
 
 const LaunchForm = () => {
@@ -38,6 +42,34 @@ const LaunchForm = () => {
   const deployedToken = useRef<DeployedTokenInfo>();
   const { currentConnection } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
+
+  const addTokenToMetaMask = async () => {
+    if (!deployedToken.current) return;
+
+    const { deployedContract, tokenSymbol, decimals } = deployedToken.current;
+
+    try {
+      const wasAdded = await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: deployedContract,
+            symbol: tokenSymbol,
+            decimals: decimals,
+          },
+        },
+      });
+
+      if (wasAdded) {
+        console.log("Token added to MetaMask");
+      } else {
+        console.log("Token not added to MetaMask");
+      }
+    } catch (error) {
+      console.error("Error adding token to MetaMask:", error);
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -142,6 +174,8 @@ const LaunchForm = () => {
           deployerAddress: signer.address,
           network: values.chain,
           contractUrl: result.data.verifiedUrl,
+          tokenSymbol: values.tokenSymbol,
+          decimals: 18,
         };
       } catch (error) {
         console.error("Error deploying contract:", error);
@@ -315,6 +349,22 @@ const LaunchForm = () => {
           {deployedToken.current && (
             <Badge variant="outline" p="2">
               <Text fontSize="sm" color="gray.500">
+                <Box textAlign="center">
+                  <Button
+                    onClick={addTokenToMetaMask}
+                    colorScheme="teal"
+                    mt={4}
+                  >
+                    Add token to MetaMask &nbsp;
+                    <Image
+                      src={metamask.src}
+                      boxSize="30px"
+                      objectFit="contain"
+                      alt="logo"
+                    />
+                  </Button>
+                </Box>
+                <br />
                 <b>Deployed token: </b>{" "}
                 <u>
                   <Link
