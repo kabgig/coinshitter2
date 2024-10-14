@@ -6,10 +6,10 @@ export default async function main() {
   const totalSupply = process.env.totalSupply;
   const marketingAddress = process.env.marketingAddress;
 
-  console.log("totalSupply", totalSupply);
-  console.log("marketingAddress", marketingAddress);
-  console.log("deployedContractAddress", deployedContractAddress);
-  console.log("contract", contract);
+  // console.log("totalSupply", totalSupply);
+  // console.log("marketingAddress", marketingAddress);
+  // console.log("deployedContractAddress", deployedContractAddress);
+  // console.log("contract", contract);
   if (!deployedContractAddress || !contract || !totalSupply) {
     throw new Error("Missing required environment variables");
   }
