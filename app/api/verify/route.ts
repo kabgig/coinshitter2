@@ -2,7 +2,6 @@ import { exec } from "child_process";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import dotenv from "dotenv";
-import hre from "hardhat";
 
 // Load environment variables from .env file
 dotenv.config();
