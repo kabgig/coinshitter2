@@ -19,7 +19,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       "scripts/verifyer.ts"
     );
     exec(
-      `npx hardhat run ${verificationScriptPath} --network basesepolia`,
+      `npx hardhat run ${verificationScriptPath} --network basesepolia --loglevel=verbose`,
       {
         env: {
           ...process.env,
