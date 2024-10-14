@@ -126,8 +126,6 @@ const LaunchForm = () => {
       const selectedChainId = networkMap[values.chain];
       const totalSupply = values.totalSupply;
       const marketingAddress = values.marketingAddress;
-      console.log("totalSupply", totalSupply);
-      console.log("marketingAddress", marketingAddress);
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
