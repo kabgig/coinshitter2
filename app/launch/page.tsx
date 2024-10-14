@@ -15,5 +15,5 @@ export default LaunchPage;
 export const metadata: Metadata = {
   title: "Launch - Coinshitter",
   description:
-    "Launch erc20 tokens with ease. No code knowledge required. Coinshitter is a decentralized token launch platform. Launch your token on Binance Smart Chain or Base with ease.",
+    "Launch ERC20 tokens with ease. No code knowledge required. Coinshitter is a decentralized token launch platform. Launch your token on Binance Smart Chain or Base with ease.",
 };
