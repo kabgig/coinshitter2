@@ -18,7 +18,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       process.cwd(),
       "scripts/verifyer.ts"
     );
-    const projectRoot = path.resolve(process.cwd(), ".");
+    const projectRoot = path.resolve(process.cwd(), "./coinshitter2");
     console.log("projectRoot", projectRoot);
     const projectRoot2 = path.resolve(process.cwd(), "..");
     console.log("projectRoot2", projectRoot2);
