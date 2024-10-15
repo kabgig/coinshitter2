@@ -26,7 +26,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     console.log("calling npx harhat run");
     process.chdir(projectRoot);
     exec(
-      `cd ${projectRoot} && npx hardhat run ${verificationScriptPath} --network basesepolia`,
+      `cd coinshitter2 && npx hardhat run ${verificationScriptPath} --network basesepolia`,
       {
         env: {
           ...process.env,
