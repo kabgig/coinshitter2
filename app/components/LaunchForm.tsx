@@ -16,7 +16,7 @@ import {
   Image,
 } from "@chakra-ui/react";
 import { useFormik } from "formik";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
@@ -42,6 +42,7 @@ const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const deployedToken = useRef<DeployedTokenInfo>();
+  const interfaceLogMessage = useRef<string>();
   const { currentConnection } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
 
@@ -109,6 +110,9 @@ const LaunchForm = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true);
+
+      interfaceLogMessage.current = "Checking wallet connection...";
+
       deployedToken.current = undefined;
       if (!currentAddress) {
         alert("Please connect your wallet first!");
@@ -130,6 +134,7 @@ const LaunchForm = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
 
+      interfaceLogMessage.current = "Checking network...";
       if (walletNetwork.chainId !== selectedChainId) {
         alert(
           `Change wallet network to match deployment network ${values.chain}.`
@@ -137,10 +142,12 @@ const LaunchForm = () => {
         setSubmitting(false);
         return;
       }
+      interfaceLogMessage.current = "Getting signer...";
       const signer = await provider.getSigner();
       const contractABI = CoinshitterArtifact.abi;
       const contractBytecode = CoinshitterArtifact.bytecode;
 
+      interfaceLogMessage.current = "Getting contract factory...";
       const factory = new ethers.ContractFactory(
         contractABI,
         contractBytecode,
@@ -148,16 +155,20 @@ const LaunchForm = () => {
       );
 
       try {
+        interfaceLogMessage.current = "Deploying contract...";
         const contract = await factory.deploy(totalSupply, marketingAddress);
+        interfaceLogMessage.current = "Awaiting for deployment...";
         await contract.waitForDeployment();
 
-        const result = await axios.post("/api/verify", {
-          deployedContractAddress: await contract.getAddress(),
-          totalSupply: totalSupply,
-          marketingAddress: marketingAddress,
-        });
+        interfaceLogMessage.current =
+          "Contract deployed! Verifying contract...";
+        // const result = await axios.post("/api/verify", {
+        //   deployedContractAddress: await contract.getAddress(),
+        //   totalSupply: totalSupply,
+        //   marketingAddress: marketingAddress,
+        // });
 
-        console.log("Verification result:", result.data);
+        // console.log("Verification result:", result.data);
 
         //console.log("result", result);
         // const parsedResult = JSON.parse(result.data);
@@ -337,7 +348,15 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
-          {/* логирование процесса в интерфейсе */}
+
+          {/* {interfaceLogMessage.current && (
+            <Badge variant="outline" p="2">
+              <Text fontSize="xs" color="gray.500">
+                {interfaceLogMessage.current}
+              </Text>
+            </Badge>
+          )} */}
+
           {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
             <Badge variant="outline" p="2">
