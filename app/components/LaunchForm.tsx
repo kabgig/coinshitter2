@@ -31,7 +31,7 @@ type DeployedTokenInfo = {
   deployedContract: string;
   deployerAddress: string;
   network: string;
-  // contractUrl: string;
+  contractUrl: string;
   tokenSymbol: string;
   tokenName: string;
   totalSupply: number;
@@ -162,13 +162,13 @@ const LaunchForm = () => {
 
         interfaceLogMessage.current =
           "Contract deployed! Verifying contract...";
-        // const result = await axios.post("/api/verify", {
-        //   deployedContractAddress: await contract.getAddress(),
-        //   totalSupply: totalSupply,
-        //   marketingAddress: marketingAddress,
-        // });
+        const result = await axios.post("/api/verify", {
+          deployedContractAddress: await contract.getAddress(),
+          totalSupply: totalSupply,
+          marketingAddress: marketingAddress,
+        });
 
-        // console.log("Verification result:", result.data);
+        console.log("Verification result:", result.data);
 
         //console.log("result", result);
         // const parsedResult = JSON.parse(result.data);
@@ -182,7 +182,7 @@ const LaunchForm = () => {
           deployedContract: await contract.getAddress(),
           deployerAddress: signer.address,
           network: values.chain,
-          //contractUrl: result.data.verifiedUrl,
+          contractUrl: result.data.verifiedUrl,
           tokenSymbol: values.tokenSymbol,
           tokenName: values.tokenName,
           totalSupply: totalSupply,
@@ -379,12 +379,12 @@ const LaunchForm = () => {
                 <br />
                 <b>Deployed token: </b>{" "}
                 <u>
-                  {/* <Link
+                  <Link
                     target="_blank"
                     href={deployedToken.current?.contractUrl}
-                  > */}
-                  {deployedToken.current?.deployedContract}
-                  {/* </Link> */}
+                  >
+                    {deployedToken.current?.deployedContract}
+                  </Link>
                 </u>
                 <br />
                 <b>Token owner: </b> {deployedToken.current?.deployerAddress}

@@ -18,9 +18,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       process.cwd(),
       "scripts/verifyer.ts"
     );
+    const projectRoot = path.resolve(process.cwd(), ".");
+    console.log("projectRoot", projectRoot);
     console.log("calling npx harhat run");
     exec(
-      `npx hardhat run ${verificationScriptPath} --network basesepolia --loglevel=verbose`,
+      `cd ${projectRoot} && npx hardhat run ${verificationScriptPath} --network basesepolia`,
       {
         env: {
           ...process.env,
