@@ -7,24 +7,24 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Image,
   Input,
   InputGroup,
   Link,
   Select,
   Text,
   VStack,
-  Image,
 } from "@chakra-ui/react";
+import axios from "axios";
+import { ethers } from "ethers";
 import { useFormik } from "formik";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import * as Yup from "yup";
+import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+import metamask from "../../public/metamask.png";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
-import { ethers } from "ethers";
-import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
-import axios from "axios";
-import metamask from "../../public/metamask.png";
 
 type DeployedTokenInfo = {
   date: string;
