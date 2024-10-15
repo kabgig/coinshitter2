@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import dotenv from "dotenv";
+import fs from "fs";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -18,10 +19,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       process.cwd(),
       "scripts/verifyer.ts"
     );
-    const projectRoot = path.resolve(process.cwd(), "./coinshitter2");
+    const projectRoot = path.resolve(process.cwd(), ".");
     console.log("projectRoot", projectRoot);
-    const projectRoot2 = path.resolve(process.cwd(), "./coinshitter2/app");
-    console.log("projectRoot2", projectRoot2);
+
+    fs.readdir(projectRoot, (err, files) => {
+      if (err) {
+        console.error(`Error reading directory: ${err}`);
+        reject(NextResponse.json({ error: err.message }, { status: 500 }));
+        return;
+      }
+      console.log("List of files in projectRoot:", files);
+    });
 
     console.log("calling npx harhat run");
     process.chdir(projectRoot);
