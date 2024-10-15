@@ -20,14 +20,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
     const projectRoot = path.resolve(process.cwd(), "./coinshitter2");
     console.log("projectRoot", projectRoot);
-    const projectRoot2 = path.resolve(process.cwd(), "..");
+    const projectRoot2 = path.resolve(process.cwd(), "./coinshitter2/app");
     console.log("projectRoot2", projectRoot2);
-    const projectRoot3 = path.resolve(process.cwd(), "../..");
-    console.log("projectRoot3", projectRoot3);
-    const projectRoot4 = path.resolve(process.cwd(), "../../..");
-    console.log("projectRoot4", projectRoot4);
-    const projectRoot5 = path.resolve(process.cwd(), "../../../..");
-    console.log("projectRoot5", projectRoot5);
 
     console.log("calling npx harhat run");
     process.chdir(projectRoot);
