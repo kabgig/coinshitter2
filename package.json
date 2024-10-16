@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "npx hardhat compile && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "npm ci"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
