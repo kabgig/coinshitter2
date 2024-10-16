@@ -1,4 +1,4 @@
-import hre from "hardhat";
+//import hre from "hardhat";
 
 export default async function main() {
   const deployedContractAddress = process.env.address;
