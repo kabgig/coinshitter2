@@ -19,20 +19,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       process.cwd(),
       "scripts/verifyer.ts"
     );
-    const projectRoot = path.resolve(process.cwd(), ".");
-    console.log("projectRoot", projectRoot);
-
-    fs.readdir(projectRoot, (err, files) => {
-      if (err) {
-        console.error(`Error reading directory: ${err}`);
-        reject(NextResponse.json({ error: err.message }, { status: 500 }));
-        return;
-      }
-      console.log("List of files in projectRoot:", files);
-    });
-
-    console.log("calling npx harhat run");
-    process.chdir(projectRoot);
     exec(
       `npx hardhat run ${verificationScriptPath} --network basesepolia`,
       {

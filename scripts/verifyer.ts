@@ -13,20 +13,20 @@ export default async function main() {
   if (!deployedContractAddress || !contract || !totalSupply) {
     throw new Error("Missing required environment variables");
   }
-  console.log("\nVERIFICATION...");
+  console.log("\nVERIFICATION....");
 
-  try {
-    await hre.run("verify:verify", {
-      address: deployedContractAddress,
-      constructorArguments: [totalSupply, marketingAddress],
-    });
-    //на крайняк можно текстовый файл билдить с уникальным название контракта
-    console.log(
-      JSON.stringify({ status: "success", message: "Verification successful" })
-    );
-  } catch (error) {
-    console.log(JSON.stringify({ status: "error", message: error }));
-  }
+  // try {
+  //   await hre.run("verify:verify", {
+  //     address: deployedContractAddress,
+  //     constructorArguments: [totalSupply, marketingAddress],
+  //   });
+  //   //на крайняк можно текстовый файл билдить с уникальным название контракта
+  //   console.log(
+  //     JSON.stringify({ status: "success", message: "Verification successful" })
+  //   );
+  // } catch (error) {
+  //   console.log(JSON.stringify({ status: "error", message: error }));
+  // }
 }
 
 main().catch((error) => {
