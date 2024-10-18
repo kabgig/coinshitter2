@@ -19,7 +19,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       "scripts/verifyer.ts"
     );
     exec(
-      `cd /var/task && HARDHAT_NETWORK=basesepolia npx ts-node ${verificationScriptPath}`,
+      `HARDHAT_NETWORK=basesepolia npx ts-node ${verificationScriptPath}`,
       {
         env: {
           ...process.env,
