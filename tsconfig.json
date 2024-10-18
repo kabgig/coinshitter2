@@ -30,7 +30,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "scripts/deployer.ts"  ],
+, "scripts/deployer.ts", "scripts/verifyer.js"  ],
   "exclude": [
     "node_modules"
   ]

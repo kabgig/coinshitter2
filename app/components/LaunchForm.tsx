@@ -7,38 +7,76 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Image,
   Input,
   InputGroup,
+  Link,
   Select,
   Text,
   VStack,
 } from "@chakra-ui/react";
+import axios from "axios";
+import { ethers } from "ethers";
 import { useFormik } from "formik";
 import { useRef } from "react";
 import * as Yup from "yup";
+import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+import metamask from "../../public/metamask.png";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
-import { ethers } from "ethers";
-import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 
 type DeployedTokenInfo = {
   date: string;
   deployedContract: string;
   deployerAddress: string;
   network: string;
+  contractUrl: string;
+  tokenSymbol: string;
+  tokenName: string;
+  totalSupply: number;
+  decimals: number;
 };
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const deployedToken = useRef<DeployedTokenInfo>();
+  const interfaceLogMessage = useRef<string>();
   const { currentConnection } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
 
+  const addTokenToMetaMask = async () => {
+    if (!deployedToken.current) return;
+
+    const { deployedContract, tokenSymbol, decimals } = deployedToken.current;
+
+    try {
+      const wasAdded = await window.ethereum.request({
+        method: "wallet_watchAsset",
+        params: {
+          type: "ERC20",
+          options: {
+            address: deployedContract,
+            symbol: tokenSymbol,
+            decimals: decimals,
+          },
+        },
+      });
+
+      if (wasAdded) {
+        console.log("Token added to MetaMask");
+      } else {
+        console.log("Token not added to MetaMask");
+      }
+    } catch (error) {
+      console.error("Error adding token to MetaMask:", error);
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
-      ownerWalletAddress: "",
+      decimals: 18,
       totalSupply: 1_000_000_000,
       tokenName: "",
       tokenSymbol: "",
@@ -47,11 +85,9 @@ const LaunchForm = () => {
       currentAddress: "",
     },
     validationSchema: Yup.object({
-      ownerWalletAddress: Yup.string()
+      decimals: Yup.number()
         .required("This field is required")
-        .test("is-eth-address", "Invalid address", (value) =>
-          ethAddressRegex.test(value)
-        ),
+        .min(0, "Decimals must be zero or positive whole number"),
       totalSupply: Yup.number()
         .required("This field is required")
         .min(1, "Total supply must be more than 1")
@@ -73,6 +109,11 @@ const LaunchForm = () => {
       chain: Yup.string().required("This field is required"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
+      setSubmitting(true);
+
+      interfaceLogMessage.current = "Checking wallet connection...";
+
+      deployedToken.current = undefined;
       if (!currentAddress) {
         alert("Please connect your wallet first!");
         return;
@@ -87,24 +128,26 @@ const LaunchForm = () => {
       };
 
       const selectedChainId = networkMap[values.chain];
+      const totalSupply = values.totalSupply;
+      const marketingAddress = values.marketingAddress;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
-      console.log("walletNetwork", walletNetwork);
-      console.log("selectedChainId", selectedChainId);
 
+      interfaceLogMessage.current = "Checking network...";
       if (walletNetwork.chainId !== selectedChainId) {
         alert(
-          `Change your wallet network to match deployment network ${values.chain}.`
+          `Change wallet network to match deployment network ${values.chain}.`
         );
         setSubmitting(false);
         return;
       }
+      interfaceLogMessage.current = "Getting signer...";
       const signer = await provider.getSigner();
-
       const contractABI = CoinshitterArtifact.abi;
       const contractBytecode = CoinshitterArtifact.bytecode;
 
+      interfaceLogMessage.current = "Getting contract factory...";
       const factory = new ethers.ContractFactory(
         contractABI,
         contractBytecode,
@@ -112,20 +155,45 @@ const LaunchForm = () => {
       );
 
       try {
-        const contract = await factory.deploy(/* constructor arguments */);
+        interfaceLogMessage.current = "Deploying contract...";
+        const contract = await factory.deploy(totalSupply, marketingAddress);
+        interfaceLogMessage.current = "Awaiting for deployment...";
         await contract.waitForDeployment();
 
+        interfaceLogMessage.current =
+          "Contract deployed! Verifying contract...";
+        const result = await axios.post("/api/verify", {
+          deployedContractAddress: await contract.getAddress(),
+          totalSupply: totalSupply,
+          marketingAddress: marketingAddress,
+        });
+
+        console.log("Verification result:", result.data);
+
+        //console.log("result", result);
+        // const parsedResult = JSON.parse(result.data);
+        // console.log("result", parsedResult);
+
         deployedToken.current = {
+          // add compiler version, Compiler Type, and optimization
+          // SPDX-License-Identifier: MIT
+          // pragma solidity ^0.8.24;
           date: new Date().toISOString(),
           deployedContract: await contract.getAddress(),
           deployerAddress: signer.address,
           network: values.chain,
+          contractUrl: result.data.verifiedUrl,
+          tokenSymbol: values.tokenSymbol,
+          tokenName: values.tokenName,
+          totalSupply: totalSupply,
+          decimals: 18,
         };
       } catch (error) {
         console.error("Error deploying contract:", error);
+      } finally {
+        console.log("setsubmitting false");
+        setSubmitting(false);
       }
-
-      setSubmitting(false);
     },
   });
 
@@ -150,48 +218,24 @@ const LaunchForm = () => {
       <form onSubmit={formik.handleSubmit}>
         <VStack spacing={4}>
           <FormControl
-            id="ownerWalletAddress"
-            isInvalid={
-              formik.touched.ownerWalletAddress &&
-              !!formik.errors.ownerWalletAddress
-            }
+            id="chain"
+            isInvalid={formik.touched.chain && !!formik.errors.chain}
           >
-            <FormLabel htmlFor="ownerWalletAddress">
-              Owner Wallet Address
-            </FormLabel>
+            <FormLabel htmlFor="chain">Network</FormLabel>
             <InputGroup>
-              <Input
-                placeholder="Enter owner wallet address"
-                {...formik.getFieldProps("ownerWalletAddress")}
-              />
-              <FormTooltip text={translate("fields.ownerWalletAddress")} />
+              {/* //TODO separation of the testnets from mainnets */}
+              <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
+                <option value="BASE_MAINNET">Base Mainnet</option>
+                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
+                <option value="BASE_TESTNET_SEPOLIA">
+                  Base Testnet Sepolia
+                </option>
+                <option value="BNB_TESTNET">BNB Testnet</option>
+                <option value="HARDHAT">Hardhat</option>
+              </Select>
             </InputGroup>
-
-            {formik.touched.ownerWalletAddress &&
-            formik.errors.ownerWalletAddress ? (
-              <FormErrorMessage>
-                {formik.errors.ownerWalletAddress}
-              </FormErrorMessage>
-            ) : null}
-          </FormControl>
-
-          <FormControl
-            id="totalSupply"
-            isInvalid={
-              formik.touched.totalSupply && !!formik.errors.totalSupply
-            }
-          >
-            <FormLabel htmlFor="totalSupply">Total supply</FormLabel>
-            <InputGroup>
-              <Input
-                placeholder="Total supply"
-                {...formik.getFieldProps("totalSupply")}
-              />
-              <FormTooltip text={translate("fields.totalSupply")} />
-            </InputGroup>
-
-            {formik.touched.totalSupply && formik.errors.totalSupply ? (
-              <FormErrorMessage>{formik.errors.totalSupply}</FormErrorMessage>
+            {formik.touched.chain && formik.errors.chain ? (
+              <FormErrorMessage>{formik.errors.chain}</FormErrorMessage>
             ) : null}
           </FormControl>
 
@@ -234,23 +278,40 @@ const LaunchForm = () => {
           </FormControl>
 
           <FormControl
-            id="chain"
-            isInvalid={formik.touched.chain && !!formik.errors.chain}
+            id="totalSupply"
+            isInvalid={
+              formik.touched.totalSupply && !!formik.errors.totalSupply
+            }
           >
-            <FormLabel htmlFor="chain">Deployment chain</FormLabel>
+            <FormLabel htmlFor="totalSupply">Total supply</FormLabel>
             <InputGroup>
-              <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BASE_MAINNET">Base Mainnet</option>
-                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
-                <option value="BASE_TESTNET_SEPOLIA">
-                  Base Testnet Sepolia
-                </option>
-                <option value="BNB_TESTNET">BNB Testnet</option>
-                <option value="HARDHAT">Hardhat</option>
-              </Select>
+              <Input
+                placeholder="Total supply"
+                {...formik.getFieldProps("totalSupply")}
+              />
+              <FormTooltip text={translate("fields.totalSupply")} />
             </InputGroup>
-            {formik.touched.chain && formik.errors.chain ? (
-              <FormErrorMessage>{formik.errors.chain}</FormErrorMessage>
+
+            {formik.touched.totalSupply && formik.errors.totalSupply ? (
+              <FormErrorMessage>{formik.errors.totalSupply}</FormErrorMessage>
+            ) : null}
+          </FormControl>
+
+          <FormControl
+            id="decimals"
+            isInvalid={formik.touched.decimals && !!formik.errors.decimals}
+          >
+            <FormLabel htmlFor="decimals">Decimals</FormLabel>
+            <InputGroup>
+              <Input
+                placeholder="Enter decimals, e.g. 18"
+                {...formik.getFieldProps("decimals")}
+              />
+              <FormTooltip text={translate("fields.decimals")} />
+            </InputGroup>
+
+            {formik.touched.decimals && formik.errors.decimals ? (
+              <FormErrorMessage>{formik.errors.decimals}</FormErrorMessage>
             ) : null}
           </FormControl>
 
@@ -287,18 +348,59 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
+
+          {/* {interfaceLogMessage.current && (
+            <Badge variant="outline" p="2">
+              <Text fontSize="xs" color="gray.500">
+                {interfaceLogMessage.current}
+              </Text>
+            </Badge>
+          )} */}
+
+          {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
             <Badge variant="outline" p="2">
               <Text fontSize="sm" color="gray.500">
-                <b>Deployed contract:</b>{" "}
-                {deployedToken.current?.deployedContract}
+                <Box textAlign="center">
+                  <Button
+                    onClick={addTokenToMetaMask}
+                    colorScheme="teal"
+                    mt={4}
+                  >
+                    Add token to MetaMask &nbsp;
+                    <Image
+                      src={metamask.src}
+                      boxSize="30px"
+                      objectFit="contain"
+                      alt="logo"
+                    />
+                  </Button>
+                </Box>
                 <br />
-                <b>Deployer address:</b>{" "}
-                {deployedToken.current?.deployerAddress}
+                <b>Deployed token: </b>{" "}
+                <u>
+                  <Link
+                    target="_blank"
+                    href={deployedToken.current?.contractUrl}
+                  >
+                    {deployedToken.current?.deployedContract}
+                  </Link>
+                </u>
                 <br />
-                <b>Network:</b> {deployedToken.current?.network}
+                <b>Token owner: </b> {deployedToken.current?.deployerAddress}
                 <br />
-                <b>Date:</b> {deployedToken.current?.date}
+                <b>Token name: </b> {deployedToken.current?.tokenName}
+                <br />
+                <b>Token symbol: </b> {deployedToken.current?.tokenSymbol}
+                <br />
+                <b>Total supply: </b> {deployedToken.current?.totalSupply}
+                <br />
+                <b>Decimals: </b> {deployedToken.current?.decimals}
+                <br />
+                <b>Network: </b> {deployedToken.current?.network}
+                <br />
+                <b>Date: </b> {deployedToken.current?.date}
+                <br />
               </Text>
             </Badge>
           )}

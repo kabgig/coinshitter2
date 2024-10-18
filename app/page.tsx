@@ -1,7 +1,10 @@
 import { Flex, Heading, VStack } from "@chakra-ui/react";
 import SubscribeForm from "./components/SubscribeForm";
+import { Metadata } from "next";
 
 export default function Home() {
+  //add meta information
+
   return (
     <Flex
       height="10vh"
@@ -20,3 +23,9 @@ export default function Home() {
     </Flex>
   );
 }
+
+export const metadata: Metadata = {
+  title: "Home - Coinshitter",
+  description:
+    "Coinshitter is a decentralized token launch platform. Launch your token on Binance Smart Chain or Ethereum with ease. No code knowledge required",
+};
