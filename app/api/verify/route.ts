@@ -1,7 +1,7 @@
 import { exec } from "child_process";
+import dotenv from "dotenv";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import dotenv from "dotenv";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -10,8 +10,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = await request.json();
   const deployedContractAddress = body.deployedContractAddress;
   const contract = "contracts/Coinshitter.sol:Coinshitter";
-  const totalSupply = body.totalSupply;
-  const marketingAddress = body.marketingAddress;
+  //const totalSupply = body.totalSupply;
+  //const marketingAddress = body.marketingAddress;
+  const tokenInfo = body.tokenInfo;
+  const deployerTax = body.deployerTax;
+  const deployFeeReceiver = body.deployFeeReceiver;
 
   return new Promise((resolve, reject) => {
     const verificationScriptPath = path.resolve(
@@ -24,12 +27,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         env: {
           ...process.env,
           address: deployedContractAddress,
-          //tokenName: body.tokenName,
-          //tokenSymbol: body.tokenSymbol,
-          totalSupply,
-          //chain: body.chain,
           contract,
-          marketingAddress,
+          tokenInfo,
+          deployerTax,
+          deployFeeReceiver,
         },
       },
       (error, stdout, stderr) => {
