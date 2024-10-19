@@ -25,6 +25,7 @@ import metamask from "../../public/metamask.png";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
+import { TokenInfo } from "../types/tokenInfo";
 
 type DeployedTokenInfo = {
   date: string;
@@ -129,7 +130,7 @@ const LaunchForm = () => {
 
       const selectedChainId = networkMap[values.chain];
       const totalSupply = values.totalSupply;
-      const marketingAddress = values.marketingAddress;
+      //const marketingAddress = values.marketingAddress;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
@@ -154,18 +155,47 @@ const LaunchForm = () => {
         signer
       );
 
+      const tokenInfo: TokenInfo = {
+        name: "MyToken",
+        symbol: "MTK",
+        marketingFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
+        devFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
+        marketingTaxBuy: 1,
+        marketingTaxSell: 2,
+        devTaxSell: 3,
+        devTaxBuy: 4,
+        lpTaxBuy: 5,
+        lpTaxSell: 6,
+        totalSupply: ethers.parseUnits(totalSupply.toString(), 18).toString(),
+        maxPercentageForWallet: 5,
+        maxPercentageForTx: 2,
+        swapRouter: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
+        newOwner: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
+      };
+
+      const deployerTax = 100;
+      const deployFeeReceiver = "0xE09cd000335F9029af7A5AF1763963b3c0e78547";
+
       try {
-        interfaceLogMessage.current = "Deploying contract...";
-        const contract = await factory.deploy(totalSupply, marketingAddress);
-        interfaceLogMessage.current = "Awaiting for deployment...";
+        console.log("Deploying contract...");
+        const contract = await factory.deploy(
+          tokenInfo,
+          deployerTax,
+          deployFeeReceiver
+        );
+        console.log("Awaiting for deployment...");
         await contract.waitForDeployment();
 
-        interfaceLogMessage.current =
-          "Contract deployed! Verifying contract...";
+        console.log("Contract deployed! Verifying contract...");
+
+        const contractAddress = await contract.getAddress();
+        console.log("contract.getAddress()", contractAddress);
+
         const result = await axios.post("/api/verify", {
-          deployedContractAddress: await contract.getAddress(),
-          totalSupply: totalSupply,
-          marketingAddress: marketingAddress,
+          tokenInfo,
+          deployerTax,
+          deployFeeReceiver,
+          deployedContractAddress: contractAddress,
         });
 
         console.log("Verification result:", result.data);
@@ -175,9 +205,6 @@ const LaunchForm = () => {
         // console.log("result", parsedResult);
 
         deployedToken.current = {
-          // add compiler version, Compiler Type, and optimization
-          // SPDX-License-Identifier: MIT
-          // pragma solidity ^0.8.24;
           date: new Date().toISOString(),
           deployedContract: await contract.getAddress(),
           deployerAddress: signer.address,
@@ -191,7 +218,6 @@ const LaunchForm = () => {
       } catch (error) {
         console.error("Error deploying contract:", error);
       } finally {
-        console.log("setsubmitting false");
         setSubmitting(false);
       }
     },
@@ -360,7 +386,7 @@ const LaunchForm = () => {
           {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
             <Badge variant="outline" p="2">
-              <Text fontSize="sm" color="gray.500">
+              <Box fontSize="sm" color="gray.500">
                 <Box textAlign="center">
                   <Button
                     onClick={addTokenToMetaMask}
@@ -401,7 +427,7 @@ const LaunchForm = () => {
                 <br />
                 <b>Date: </b> {deployedToken.current?.date}
                 <br />
-              </Text>
+              </Box>
             </Badge>
           )}
         </VStack>
