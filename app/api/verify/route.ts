@@ -3,15 +3,11 @@ import dotenv from "dotenv";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 
-// Load environment variables from .env file
 dotenv.config();
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const body = await request.json();
   const deployedContractAddress = body.deployedContractAddress;
-  const contract = "contracts/Coinshitter.sol:Coinshitter";
-  //const totalSupply = body.totalSupply;
-  //const marketingAddress = body.marketingAddress;
   const tokenInfo = body.tokenInfo;
   const deployerTax = body.deployerTax;
   const deployFeeReceiver = body.deployFeeReceiver;
@@ -27,7 +23,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         env: {
           ...process.env,
           address: deployedContractAddress,
-          contract,
           tokenInfo,
           deployerTax,
           deployFeeReceiver,
@@ -71,5 +66,4 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     );
   });
-  //return NextResponse.json("Verification ID");
 }

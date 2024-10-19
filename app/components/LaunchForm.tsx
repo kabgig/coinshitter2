@@ -76,11 +76,11 @@ const LaunchForm = () => {
     initialValues: {
       decimals: 18,
       totalSupply: 1_000_000_000,
-      tokenName: "",
-      tokenSymbol: "",
-      marketingAddress: "",
-      chain: "",
-      currentAddress: "",
+      tokenName: "MyCoin",
+      tokenSymbol: "COIN",
+      marketingAddress: "0x7234567890abcdef1234567890abcdef12345678",
+      chain: "BASE_TESTNET_SEPOLIA",
+      currentAddress: "0x7234567890abcdef1234567890abcdef12345678",
     },
     validationSchema: Yup.object({
       decimals: Yup.number()
@@ -175,16 +175,16 @@ const LaunchForm = () => {
           deployerTax,
           deployFeeReceiver
         );
-        setInterfaceLogMessage("Deploying contract...");
+        setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();
 
         const contractAddress = await contract.getAddress();
         setInterfaceLogMessage(
-          `Contract is deployed!\nVerifying contract ${contractAddress}`
+          `Token is deployed!\nVerifying ${contractAddress}`
         );
 
         const result = await axios.post("/api/verify", {
-          tokenInfo,
+          tokenInfo: JSON.stringify(tokenInfo),
           deployerTax,
           deployFeeReceiver,
           deployedContractAddress: contractAddress,
@@ -202,8 +202,8 @@ const LaunchForm = () => {
           decimals: 18,
         };
       } catch (error) {
-        console.error("Error deploying contract:", error);
-        setInterfaceLogMessage(`Error deploying contract ${error}`);
+        console.error("Error deploying token:", error);
+        setInterfaceLogMessage(`Error deploying token ${error}`);
       } finally {
         setSubmitting(false);
       }
