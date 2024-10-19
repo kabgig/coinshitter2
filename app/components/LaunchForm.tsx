@@ -18,7 +18,7 @@ import {
 import axios from "axios";
 import { ethers } from "ethers";
 import { useFormik } from "formik";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 import metamask from "../../public/metamask.png";
@@ -46,6 +46,13 @@ const LaunchForm = () => {
   const interfaceLogMessage = useRef<string>();
   const { currentConnection } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
+  const badgeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (deployedToken.current && badgeRef.current) {
+      badgeRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [deployedToken.current]);
 
   const addTokenToMetaMask = async () => {
     if (!deployedToken.current) return;
@@ -385,7 +392,7 @@ const LaunchForm = () => {
 
           {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
-            <Badge variant="outline" p="2">
+            <Badge variant="outline" p="2" ref={badgeRef}>
               <Box fontSize="sm" color="gray.500">
                 <Box textAlign="center">
                   <Button
