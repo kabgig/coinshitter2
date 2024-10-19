@@ -26,25 +26,15 @@ import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
 import FormTooltip from "./FormTooltip";
 import { TokenInfo } from "../types/tokenInfo";
-
-type DeployedTokenInfo = {
-  date: string;
-  deployedContract: string;
-  deployerAddress: string;
-  network: string;
-  contractUrl: string;
-  tokenSymbol: string;
-  tokenName: string;
-  totalSupply: number;
-  decimals: number;
-};
+import ProgressBadge from "./ProgressBadge";
+import { DeployedTokenInfo } from "../types/tokenInfo";
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const deployedToken = useRef<DeployedTokenInfo>();
   const interfaceLogMessage = useRef<string>();
-  const { currentConnection } = useGlobalStore();
+  const { currentConnection, setInterfaceLogMessage } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
   const badgeRef = useRef<HTMLDivElement>(null);
 
@@ -118,8 +108,7 @@ const LaunchForm = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true);
-
-      interfaceLogMessage.current = "Checking wallet connection...";
+      setInterfaceLogMessage("Checking wallet connection...");
 
       deployedToken.current = undefined;
       if (!currentAddress) {
@@ -142,7 +131,6 @@ const LaunchForm = () => {
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
 
-      interfaceLogMessage.current = "Checking network...";
       if (walletNetwork.chainId !== selectedChainId) {
         alert(
           `Change wallet network to match deployment network ${values.chain}.`
@@ -150,12 +138,10 @@ const LaunchForm = () => {
         setSubmitting(false);
         return;
       }
-      interfaceLogMessage.current = "Getting signer...";
       const signer = await provider.getSigner();
       const contractABI = CoinshitterArtifact.abi;
       const contractBytecode = CoinshitterArtifact.bytecode;
 
-      interfaceLogMessage.current = "Getting contract factory...";
       const factory = new ethers.ContractFactory(
         contractABI,
         contractBytecode,
@@ -184,19 +170,18 @@ const LaunchForm = () => {
       const deployFeeReceiver = "0xE09cd000335F9029af7A5AF1763963b3c0e78547";
 
       try {
-        console.log("Deploying contract...");
         const contract = await factory.deploy(
           tokenInfo,
           deployerTax,
           deployFeeReceiver
         );
-        console.log("Awaiting for deployment...");
+        setInterfaceLogMessage("Deploying contract...");
         await contract.waitForDeployment();
 
-        console.log("Contract deployed! Verifying contract...");
-
         const contractAddress = await contract.getAddress();
-        console.log("contract.getAddress()", contractAddress);
+        setInterfaceLogMessage(
+          `Contract is deployed!\nVerifying contract ${contractAddress}`
+        );
 
         const result = await axios.post("/api/verify", {
           tokenInfo,
@@ -204,12 +189,6 @@ const LaunchForm = () => {
           deployFeeReceiver,
           deployedContractAddress: contractAddress,
         });
-
-        console.log("Verification result:", result.data);
-
-        //console.log("result", result);
-        // const parsedResult = JSON.parse(result.data);
-        // console.log("result", parsedResult);
 
         deployedToken.current = {
           date: new Date().toISOString(),
@@ -224,6 +203,7 @@ const LaunchForm = () => {
         };
       } catch (error) {
         console.error("Error deploying contract:", error);
+        setInterfaceLogMessage(`Error deploying contract ${error}`);
       } finally {
         setSubmitting(false);
       }
@@ -381,14 +361,7 @@ const LaunchForm = () => {
           >
             Deploy token
           </Button>
-
-          {/* {interfaceLogMessage.current && (
-            <Badge variant="outline" p="2">
-              <Text fontSize="xs" color="gray.500">
-                {interfaceLogMessage.current}
-              </Text>
-            </Badge>
-          )} */}
+          {!deployedToken.current && <ProgressBadge />}
 
           {/* при сабмите надо добавить проверку имени и символа токена */}
           {deployedToken.current && (
