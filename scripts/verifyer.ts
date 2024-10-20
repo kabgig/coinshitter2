@@ -1,5 +1,6 @@
 import hre from "hardhat";
 import { TokenInfo } from "../app/types/tokenInfo";
+import build from "next/dist/build";
 
 export default async function main() {
   const deployedContractAddress = process.env.address;
@@ -29,7 +30,8 @@ export default async function main() {
   try {
     await hre.run("verify:verify", {
       address: deployedContractAddress,
-      constructorArguments: [tokenInfo, deployerTax, deployFeeReceiver],
+      constructorArguments: [tokenInfo.name, tokenInfo.symbol],
+      contract: "contracts/StandardERC20.sol:StandardERC20",
     });
     console.log(
       JSON.stringify({ status: "success", message: "Verification successful" })

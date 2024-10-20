@@ -21,6 +21,7 @@ import { useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+import StandardERC20Artefact from "../../artifacts/contracts/StandardERC20.sol/StandardERC20.json";
 import metamask from "../../public/metamask.png";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
@@ -138,9 +139,11 @@ const LaunchForm = () => {
         setSubmitting(false);
         return;
       }
+
+      const artifact = StandardERC20Artefact;
       const signer = await provider.getSigner();
-      const contractABI = CoinshitterArtifact.abi;
-      const contractBytecode = CoinshitterArtifact.bytecode;
+      const contractABI = artifact.abi;
+      const contractBytecode = artifact.bytecode;
 
       const factory = new ethers.ContractFactory(
         contractABI,
@@ -149,8 +152,8 @@ const LaunchForm = () => {
       );
 
       const tokenInfo: TokenInfo = {
-        name: "MyToken",
-        symbol: "MTK",
+        name: values.tokenName,
+        symbol: values.tokenSymbol,
         marketingFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
         devFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
         marketingTaxBuy: 1,
@@ -171,9 +174,8 @@ const LaunchForm = () => {
 
       try {
         const contract = await factory.deploy(
-          tokenInfo,
-          deployerTax,
-          deployFeeReceiver
+          values.tokenName,
+          values.tokenSymbol
         );
         setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();
