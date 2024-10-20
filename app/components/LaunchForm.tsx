@@ -20,7 +20,7 @@ import { ethers } from "ethers";
 import { useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+//import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 import StandardERC20Artefact from "../../artifacts/contracts/StandardERC20.sol/StandardERC20.json";
 import metamask from "../../public/metamask.png";
 import useLocale from "../hooks/useLocales";
@@ -34,7 +34,6 @@ const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
   const { translate } = useLocale();
   const deployedToken = useRef<DeployedTokenInfo>();
-  const interfaceLogMessage = useRef<string>();
   const { currentConnection, setInterfaceLogMessage } = useGlobalStore();
   const currentAddress = currentConnection?.signer?.getAddress() || "";
   const badgeRef = useRef<HTMLDivElement>(null);

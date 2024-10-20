@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Spacer, Text } from "@chakra-ui/react";
+import { Badge, Button, Spacer, Text } from "@chakra-ui/react";
 import React, { useState, useEffect } from "react";
 import useGlobalStore from "../state/store";
 
