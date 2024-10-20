@@ -6,7 +6,6 @@ const LaunchPage = () => {
   return (
     <Box>
       <LaunchForm />
-      <LaunchForm />
     </Box>
   );
 };
