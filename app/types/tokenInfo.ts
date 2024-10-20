@@ -15,3 +15,15 @@ export type TokenInfo = {
   swapRouter: string;
   newOwner: string;
 };
+
+export type DeployedTokenInfo = {
+  date: string;
+  deployedContract: string;
+  deployerAddress: string;
+  network: string;
+  contractUrl: string;
+  tokenSymbol: string;
+  tokenName: string;
+  totalSupply: number;
+  decimals: number;
+};

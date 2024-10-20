@@ -18,6 +18,8 @@ interface globalStore {
   setCurrentUserAddress: (currentUserAddress: string | undefined) => void;
   currentWalletNetwork: string | undefined;
   setCurrentWalletNetwork: (currentNetwork: string | undefined) => void;
+  interfaceLogMessage: string | undefined;
+  setInterfaceLogMessage: (interfaceLogMessage: string | undefined) => void;
 }
 
 const useGlobalStore = create<globalStore>((set) => ({
@@ -40,6 +42,9 @@ const useGlobalStore = create<globalStore>((set) => ({
   currentWalletNetwork: undefined,
   setCurrentWalletNetwork: (currentNetwork) =>
     set({ currentWalletNetwork: currentNetwork }),
+  interfaceLogMessage: undefined,
+  setInterfaceLogMessage: (interfaceLogMessage) =>
+    set({ interfaceLogMessage: interfaceLogMessage }),
 }));
 
 export default useGlobalStore;
