@@ -1,6 +1,5 @@
 import hre from "hardhat";
 import { TokenInfo } from "../app/types/tokenInfo";
-import build from "next/dist/build";
 
 export default async function main() {
   const deployedContractAddress = process.env.address;
