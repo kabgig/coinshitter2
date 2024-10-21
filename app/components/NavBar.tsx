@@ -16,7 +16,7 @@ import useGlobalStore from "../state/store";
 import AddressBadge from "./AddressBadge";
 import ColorModeSwitch from "./ColorModeSwitch";
 import ConnectWallet from "./ConnectWalletButton";
-import networkIds from "../configs/networkIds";
+import NetworkBadge from "./NetworkBadge";
 
 const NavBar = () => {
   const { colorMode } = useColorMode();
@@ -52,7 +52,7 @@ const NavBar = () => {
           "eth_chainId",
           []
         );
-        setCurrentWalletNetwork(networkIds.get(chainId));
+        setCurrentWalletNetwork(chainId);
       }
     };
 
@@ -90,7 +90,7 @@ const NavBar = () => {
               />
             )}
           </Link>
-          <Link href="/">Home</Link>
+          {/* <Link href="/">Home</Link> */}
           <Link href="/launch">Launch</Link>
           {/* <Link href="/faq">FAQ</Link> */}
         </HStack>
@@ -98,9 +98,7 @@ const NavBar = () => {
       <Spacer />
       <Box>
         <HStack gap={10} fontWeight="bold">
-          {currentConnection && currentWalletNetwork && (
-            <Text fontSize="xs"> {currentWalletNetwork}</Text>
-          )}
+          {currentConnection && currentWalletNetwork && <NetworkBadge />}
           {currentBalance && (
             <Text fontSize="xs">
               {ethers.formatEther(currentBalance).slice(0, 7)}

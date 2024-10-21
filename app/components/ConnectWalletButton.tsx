@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
-import networkIds from "../configs/networkIds";
 
 const ConnectWalletButton: React.FC = () => {
   const {
@@ -96,7 +95,7 @@ const ConnectWalletButton: React.FC = () => {
     const chosenChainId = await window.ethereum.request({
       method: "eth_chainId",
     });
-    setCurrentWalletNetwork(networkIds.get(chosenChainId));
+    setCurrentWalletNetwork(chosenChainId);
   };
 
   const _resetState = () => {
