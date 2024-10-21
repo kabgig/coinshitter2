@@ -96,7 +96,7 @@ const ConnectWalletButton: React.FC = () => {
     const chosenChainId = await window.ethereum.request({
       method: "eth_chainId",
     });
-    setCurrentWalletNetwork(networkIds.get(chosenChainId));
+    setCurrentWalletNetwork(chosenChainId);
   };
 
   const _resetState = () => {

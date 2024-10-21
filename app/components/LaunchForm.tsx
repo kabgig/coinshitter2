@@ -108,6 +108,7 @@ const LaunchForm = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       setSubmitting(true);
+
       setInterfaceLogMessage("Checking wallet connection...");
 
       deployedToken.current = undefined;
@@ -170,6 +171,8 @@ const LaunchForm = () => {
 
       const deployerTax = 100;
       const deployFeeReceiver = "0xE09cd000335F9029af7A5AF1763963b3c0e78547";
+
+      //check here
 
       try {
         const contract = await factory.deploy(
