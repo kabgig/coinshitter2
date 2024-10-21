@@ -23,12 +23,12 @@ import * as Yup from "yup";
 //import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 import StandardERC20Artefact from "../../artifacts/contracts/StandardERC20.sol/StandardERC20.json";
 import metamask from "../../public/metamask.png";
+import { networkDecimalIds } from "../configs/networkIds";
 import useLocale from "../hooks/useLocales";
 import useGlobalStore from "../state/store";
+import { DeployedTokenInfo, TokenInfo } from "../types/tokenInfo";
 import FormTooltip from "./FormTooltip";
-import { TokenInfo } from "../types/tokenInfo";
 import ProgressBadge from "./ProgressBadge";
-import { DeployedTokenInfo } from "../types/tokenInfo";
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -117,15 +117,7 @@ const LaunchForm = () => {
         return;
       }
 
-      const networkMap: { [key: string]: bigint } = {
-        BNB_TESTNET: 97n,
-        BNB_MAINNET: 56n,
-        HARDHAT: 1337n,
-        BASE_MAINNET: 8453n,
-        BASE_TESTNET_SEPOLIA: 84532n,
-      };
-
-      const selectedChainId = networkMap[values.chain];
+      const selectedChainId = networkDecimalIds.get(values.chain);
       const totalSupply = values.totalSupply;
       //const marketingAddress = values.marketingAddress;
 

@@ -14,5 +14,13 @@ const networkNames: Map<string, string> = new Map([
   ["0x38", "Binance Smart Chain Mainnet"],
 ]);
 
+const networkDecimalIds: Map<string, bigint> = new Map([
+  ["BNB_TESTNET", 97n],
+  ["BNB_MAINNET", 56n],
+  ["HARDHAT", 1337n],
+  ["BASE_MAINNET", 8453n],
+  ["BASE_TESTNET_SEPOLIA", 84532n],
+]);
+
 export default networkIds;
-export { networkNames };
+export { networkNames, networkDecimalIds };

@@ -3,7 +3,6 @@ import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import useGlobalStore from "../state/store";
 import NetworkErrorMessage from "./NetworkErrorMessage";
-import networkIds from "../configs/networkIds";
 
 const ConnectWalletButton: React.FC = () => {
   const {

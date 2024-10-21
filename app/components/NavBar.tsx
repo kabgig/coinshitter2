@@ -16,7 +16,6 @@ import useGlobalStore from "../state/store";
 import AddressBadge from "./AddressBadge";
 import ColorModeSwitch from "./ColorModeSwitch";
 import ConnectWallet from "./ConnectWalletButton";
-import networkIds from "../configs/networkIds";
 import NetworkBadge from "./NetworkBadge";
 
 const NavBar = () => {

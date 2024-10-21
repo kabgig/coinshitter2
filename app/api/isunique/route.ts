@@ -7,7 +7,7 @@ dotenv.config();
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body = await request.json();
-    const tokenName = body.tokenName;
+    //const tokenName = body.tokenName;
     const tokenSymbol = body.tokenSymbol;
 
     const isUnique = true;
