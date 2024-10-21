@@ -8,7 +8,6 @@ const NetworkBadge = () => {
 
   return (
     <Text fontSize="xs">
-      {" "}
       {currentWalletNetwork && networkNames.get(currentWalletNetwork)}
     </Text>
   );
