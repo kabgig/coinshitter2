@@ -1,7 +1,7 @@
 import { exec } from "child_process";
-import dotenv from "dotenv";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -11,6 +11,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const tokenInfo = body.tokenInfo;
   const deployerTax = body.deployerTax;
   const deployFeeReceiver = body.deployFeeReceiver;
+  const networkEnum = body.network;
+
+  const network = (() => {
+    switch (networkEnum) {
+      case "BASE_TESTNET_SEPOLIA":
+        return "basesepolia";
+      case "BSC_TESTNET":
+        return "bsctestnet";
+      default:
+        return "unknown";
+    }
+  })();
 
   return new Promise((resolve, reject) => {
     const verificationScriptPath = path.resolve(
@@ -18,7 +30,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       "scripts/verifyer.ts"
     );
     exec(
-      `HARDHAT_NETWORK=basesepolia npx ts-node ${verificationScriptPath}`,
+      // `HARDHAT_NETWORK=basesepolia npx ts-node ${verificationScriptPath}`,
+      `npx hardhat run ${verificationScriptPath} --network ${network}`,
       {
         env: {
           ...process.env,

@@ -17,19 +17,19 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      mainnet: "YOUR_ETHERSCAN_API_KEY",
-      bsc: "YOUR_BSCSCAN_API_KEY",
-      polygon: "YOUR_POLYGONSCAN_API_KEY",
+      bscTestnet: process.env.BSC_SCAN_API_KEY!,
       baseSepolia: process.env.BASE_SCAN_API_KEY!,
+      mainnet: "YOUR_ETHERSCAN_API_KEY",
+      polygon: "YOUR_POLYGONSCAN_API_KEY",
       // Add other networks as needed
     },
   },
   networks: {
-    bnbtestnet: {
+    bsctestnet: {
       url: "https://data-seed-prebsc-1-s1.binance.org:8545/",
     },
     bsc: {
-      url: "https://bsc-dataseed.binance.org/",
+      url: "https://api.bscscan.com/api",
     },
     polygon: {
       url: "https://polygon-rpc.com/",

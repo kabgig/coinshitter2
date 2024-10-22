@@ -29,6 +29,8 @@ import useGlobalStore from "../state/store";
 import { DeployedTokenInfo, TokenInfo } from "../types/tokenInfo";
 import FormTooltip from "./FormTooltip";
 import ProgressBadge from "./ProgressBadge";
+import dotenv from "dotenv";
+dotenv.config();
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -164,12 +166,12 @@ const LaunchForm = () => {
       const deployerTax = 100;
       const deployFeeReceiver = "0xE09cd000335F9029af7A5AF1763963b3c0e78547";
 
-      //check here
-
       try {
         const contract = await factory.deploy(
           values.tokenName,
-          values.tokenSymbol
+          values.tokenSymbol,
+          process.env.NEXT_PUBLIC_DEV_ADDRESS,
+          tokenInfo.totalSupply
         );
         setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();
@@ -184,6 +186,7 @@ const LaunchForm = () => {
           deployerTax,
           deployFeeReceiver,
           deployedContractAddress: contractAddress,
+          network: values.chain,
         });
 
         deployedToken.current = {
@@ -234,13 +237,11 @@ const LaunchForm = () => {
             <InputGroup>
               {/* //TODO separation of the testnets from mainnets */}
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BASE_MAINNET">Base Mainnet</option>
-                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
-                <option value="BASE_TESTNET_SEPOLIA">
-                  Base Testnet Sepolia
-                </option>
-                <option value="BNB_TESTNET">BNB Testnet</option>
-                <option value="HARDHAT">Hardhat</option>
+                {/* <option value="BASE_MAINNET">Base Mainnet</option> */}
+                {/* <option value="BSC_MAINNET">BSC Mainnet</option> */}
+                <option value="BASE_TESTNET_SEPOLIA">Base Sepolia</option>
+                <option value="BSC_TESTNET">BSC Testnet</option>
+                {/* <option value="HARDHAT">Hardhat</option> */}
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (
