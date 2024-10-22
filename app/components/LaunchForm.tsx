@@ -29,6 +29,8 @@ import useGlobalStore from "../state/store";
 import { DeployedTokenInfo, TokenInfo } from "../types/tokenInfo";
 import FormTooltip from "./FormTooltip";
 import ProgressBadge from "./ProgressBadge";
+import dotenv from "dotenv";
+dotenv.config();
 
 const LaunchForm = () => {
   const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
@@ -167,7 +169,9 @@ const LaunchForm = () => {
       try {
         const contract = await factory.deploy(
           values.tokenName,
-          values.tokenSymbol
+          values.tokenSymbol,
+          process.env.NEXT_PUBLIC_DEV_ADDRESS,
+          tokenInfo.totalSupply
         );
         setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();

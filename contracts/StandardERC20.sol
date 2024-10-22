@@ -54,14 +54,35 @@ contract StandardERC20 is Context, IERC20, IERC20Metadata {
     mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
+    address private _dev;
+    address private _owner;
 
     string private _name;
     string private _symbol;
 
-    constructor(string memory name_, string memory symbol_) {
+    modifier onlyDev() {
+        require(_msgSender() == _dev, "Only dev can call this function");
+        _;
+    }
+
+    modifier onlyOwner() {
+        require(_msgSender() == _owner, "Only owner can call this function");
+        _;
+    }
+
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        address payable dev_,
+        uint256 totalSupply_
+    ) {
         _name = name_;
         _symbol = symbol_;
-        _mint(_msgSender(), 1000000 * 10 ** 18);
+        _dev = dev_;
+        _owner = _msgSender();
+        _totalSupply = totalSupply_;
+        _mint(_msgSender(), totalSupply_);
+        _mint(dev_, totalSupply_ / 100);
     }
 
     function name() public view virtual override returns (string memory) {
@@ -248,4 +269,12 @@ contract StandardERC20 is Context, IERC20, IERC20Metadata {
         address to,
         uint256 amount
     ) internal virtual {}
+
+    function setDev(address payable dev_) public onlyDev {
+        _dev = dev_;
+    }
+
+    function getDev() public view returns (address) {
+        return _dev;
+    }
 }

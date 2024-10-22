@@ -1,7 +1,7 @@
 import { exec } from "child_process";
-import dotenv from "dotenv";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       case "BNB_TESTNET":
         return "bsctestnet";
       default:
-        return "unknown"; // Add a default case to handle unexpected values
+        return "unknown";
     }
   })();
 
