@@ -56,6 +56,7 @@ contract StandardERC20 is Context, IERC20, IERC20Metadata {
     uint256 private _totalSupply;
     address private _dev;
     address private _owner;
+    address private _marketingAddress;
 
     string private _name;
     string private _symbol;

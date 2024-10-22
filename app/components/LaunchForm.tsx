@@ -237,13 +237,11 @@ const LaunchForm = () => {
             <InputGroup>
               {/* //TODO separation of the testnets from mainnets */}
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                <option value="BASE_MAINNET">Base Mainnet</option>
-                <option value="BNB_MAINNET">BNB Mainnet BSC</option>
-                <option value="BASE_TESTNET_SEPOLIA">
-                  Base Testnet Sepolia
-                </option>
-                <option value="BNB_TESTNET">BNB Testnet</option>
-                <option value="HARDHAT">Hardhat</option>
+                {/* <option value="BASE_MAINNET">Base Mainnet</option> */}
+                {/* <option value="BSC_MAINNET">BSC Mainnet</option> */}
+                <option value="BASE_TESTNET_SEPOLIA">Base Sepolia</option>
+                <option value="BSC_TESTNET">BSC Testnet</option>
+                {/* <option value="HARDHAT">Hardhat</option> */}
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (

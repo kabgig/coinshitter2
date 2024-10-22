@@ -17,7 +17,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     switch (networkEnum) {
       case "BASE_TESTNET_SEPOLIA":
         return "basesepolia";
-      case "BNB_TESTNET":
+      case "BSC_TESTNET":
         return "bsctestnet";
       default:
         return "unknown";

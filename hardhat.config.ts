@@ -17,7 +17,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
-      bscTestnet: process.env.BNBSCAN_API_KEY!,
+      bscTestnet: process.env.BSC_SCAN_API_KEY!,
       baseSepolia: process.env.BASE_SCAN_API_KEY!,
       mainnet: "YOUR_ETHERSCAN_API_KEY",
       polygon: "YOUR_POLYGONSCAN_API_KEY",
