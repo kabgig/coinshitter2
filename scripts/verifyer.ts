@@ -1,6 +1,7 @@
 import hre from "hardhat";
 import { TokenInfo } from "../app/types/tokenInfo";
-import build from "next/dist/build";
+import dotenv from "dotenv";
+dotenv.config();
 
 export default async function main() {
   const deployedContractAddress = process.env.address;
@@ -26,11 +27,16 @@ export default async function main() {
     throw new Error("Missing required environment variables");
   }
   console.log("\nVERIFICATION....");
-
+  console.log("tokenInfo.totalSupply2", tokenInfo.totalSupply);
   try {
     await hre.run("verify:verify", {
       address: deployedContractAddress,
-      constructorArguments: [tokenInfo.name, tokenInfo.symbol],
+      constructorArguments: [
+        tokenInfo.name,
+        tokenInfo.symbol,
+        process.env.NEXT_PUBLIC_DEV_ADDRESS,
+        tokenInfo.totalSupply,
+      ],
       contract: "contracts/StandardERC20.sol:StandardERC20",
     });
     console.log(
