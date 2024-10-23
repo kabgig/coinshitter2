@@ -21,6 +21,7 @@ import { useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 //import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
+import dotenv from "dotenv";
 import StandardERC20Artefact from "../../artifacts/contracts/StandardERC20.sol/StandardERC20.json";
 import metamask from "../../public/metamask.png";
 import { networkDecimalIds } from "../configs/networkIds";
@@ -29,7 +30,6 @@ import useGlobalStore from "../state/store";
 import { DeployedTokenInfo, TokenInfo } from "../types/tokenInfo";
 import FormTooltip from "./FormTooltip";
 import ProgressBadge from "./ProgressBadge";
-import dotenv from "dotenv";
 dotenv.config();
 
 const LaunchForm = () => {
@@ -178,15 +178,18 @@ const LaunchForm = () => {
 
         const txResponse = await contract.deploymentTransaction();
         if (txResponse) {
-          console.log("Waiting for five confirmations...");
-          await txResponse?.wait(5);
-          console.log("Five confirmations received.");
+          setInterfaceLogMessage(
+            "Token deployed. Waiting for confirmations..."
+          );
+          await txResponse.wait(5);
+        } else {
+          throw new Error(
+            "Failed to get deployment transaction confirmations. No txResponse"
+          );
         }
 
         const contractAddress = await contract.getAddress();
-        setInterfaceLogMessage(
-          `Token is deployed!\nVerifying ${contractAddress}`
-        );
+        setInterfaceLogMessage(`Verifying ${contractAddress}`);
 
         const result = await axios.post("/api/verify", {
           tokenInfo: JSON.stringify(tokenInfo),

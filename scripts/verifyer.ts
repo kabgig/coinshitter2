@@ -1,6 +1,6 @@
+import dotenv from "dotenv";
 import hre from "hardhat";
 import { TokenInfo } from "../app/types/tokenInfo";
-import dotenv from "dotenv";
 dotenv.config();
 
 export default async function main() {
@@ -27,6 +27,7 @@ export default async function main() {
     throw new Error("Missing required environment variables");
   }
   console.log("\nVERIFICATION....");
+
   try {
     await hre.run("verify:verify", {
       address: deployedContractAddress,
@@ -38,8 +39,7 @@ export default async function main() {
       ],
       contract: "contracts/StandardERC20.sol:StandardERC20",
     });
-    //fix this on polygon, try with a testnet
-    //":"ContractVerificationMissingBytecodeError: Failed to send contract verification request.\nEndpoint URL: https://api.polygonscan.com/api\nReason: The Etherscan API responded that the address 0x9c876B31F49b7E704C24dc76C96f2762f6888f6E does not have bytecode.\nThis can happen if the contract was recently deployed and this fact hasn't propagated to the backend yet.\nTry waiting for a minute before verifying your contract. If you are invoking this from a script,\ntry to wait for five confirmations of your contract deployment transaction before running the verification subtask.\n
+
     console.log(
       JSON.stringify({ status: "success", message: "Verification successful" })
     );

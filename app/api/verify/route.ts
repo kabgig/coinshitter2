@@ -1,7 +1,7 @@
 import { exec } from "child_process";
+import dotenv from "dotenv";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import dotenv from "dotenv";
 
 dotenv.config();
 
