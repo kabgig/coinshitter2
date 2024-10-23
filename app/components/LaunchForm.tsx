@@ -22,7 +22,7 @@ import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 //import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
 import dotenv from "dotenv";
-import StandardERC20Artefact from "../../artifacts/contracts/StandardERC20.sol/StandardERC20.json";
+import StandardTokenCSArtifact from "../../artifacts/contracts/StandardTokenCS.sol/StandardTokenCS.json";
 import metamask from "../../public/metamask.png";
 import { networkDecimalIds } from "../configs/networkIds";
 import useLocale from "../hooks/useLocales";
@@ -121,7 +121,6 @@ const LaunchForm = () => {
 
       const selectedChainId = networkDecimalIds.get(values.chain);
       const totalSupply = values.totalSupply;
-      //const marketingAddress = values.marketingAddress;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
@@ -134,7 +133,7 @@ const LaunchForm = () => {
         return;
       }
 
-      const artifact = StandardERC20Artefact;
+      const artifact = StandardTokenCSArtifact;
       const signer = await provider.getSigner();
       const contractABI = artifact.abi;
       const contractBytecode = artifact.bytecode;
@@ -148,8 +147,8 @@ const LaunchForm = () => {
       const tokenInfo: TokenInfo = {
         name: values.tokenName,
         symbol: values.tokenSymbol,
-        marketingFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
-        devFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
+        marketingFeeReceiver: values.marketingAddress,
+        devFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547", // выяснить как передавать из .env
         marketingTaxBuy: 1,
         marketingTaxSell: 2,
         devTaxSell: 3,
@@ -168,10 +167,9 @@ const LaunchForm = () => {
 
       try {
         const contract = await factory.deploy(
-          values.tokenName,
-          values.tokenSymbol,
-          process.env.NEXT_PUBLIC_DEV_ADDRESS,
-          tokenInfo.totalSupply
+          tokenInfo,
+          deployerTax,
+          deployFeeReceiver
         );
         setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();
