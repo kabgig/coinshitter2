@@ -176,6 +176,13 @@ const LaunchForm = () => {
         setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();
 
+        const txResponse = await contract.deploymentTransaction();
+        if (txResponse) {
+          console.log("Waiting for five confirmations...");
+          await txResponse?.wait(5);
+          console.log("Five confirmations received.");
+        }
+
         const contractAddress = await contract.getAddress();
         setInterfaceLogMessage(
           `Token is deployed!\nVerifying ${contractAddress}`
@@ -237,11 +244,11 @@ const LaunchForm = () => {
             <InputGroup>
               {/* //TODO separation of the testnets from mainnets */}
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                {/* <option value="BASE_MAINNET">Base Mainnet</option> */}
+                <option value="POLYGON">Polygon Mainnet</option>
+                <option value="BASE_MAINNET">Base Mainnet</option>
                 {/* <option value="BSC_MAINNET">BSC Mainnet</option> */}
                 <option value="BASE_TESTNET_SEPOLIA">Base Sepolia</option>
                 <option value="BSC_TESTNET">BSC Testnet</option>
-                {/* <option value="HARDHAT">Hardhat</option> */}
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (

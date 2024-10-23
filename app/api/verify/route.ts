@@ -19,10 +19,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return "basesepolia";
       case "BSC_TESTNET":
         return "bsctestnet";
+      case "BASE_MAINNET":
+        return "base";
+      case "BSC_MAINNET":
+        return "bsc";
+      case "POLYGON":
+        return "polygon";
       default:
         return "unknown";
     }
   })();
+  console.log("network", network);
 
   return new Promise((resolve, reject) => {
     const verificationScriptPath = path.resolve(

@@ -4,6 +4,7 @@ const networkIds: Map<string, string> = new Map([
   ["0x2105", "BASE_MAINNET"],
   ["0x14a34", "BASE_TESTNET_SEPOLIA"],
   ["0x38", "BSC_MAINNET"],
+  ["0x89", "POLYGON"],
 ]);
 
 const networkNames: Map<string, string> = new Map([
@@ -12,6 +13,7 @@ const networkNames: Map<string, string> = new Map([
   ["0x2105", "BASE Mainnet"],
   ["0x14a34", "BASE Sepolia"],
   ["0x38", "BSC Mainnet"],
+  ["0x89", "Polygon Mainnet"],
 ]);
 
 const networkDecimalIds: Map<string, bigint> = new Map([
@@ -20,6 +22,7 @@ const networkDecimalIds: Map<string, bigint> = new Map([
   ["HARDHAT", 1337n],
   ["BASE_MAINNET", 8453n],
   ["BASE_TESTNET_SEPOLIA", 84532n],
+  ["POLYGON", 137n],
 ]);
 
 export default networkIds;
