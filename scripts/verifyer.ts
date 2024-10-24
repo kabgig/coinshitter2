@@ -28,9 +28,8 @@ export default async function main() {
   ) {
     throw new Error("Missing required environment variables");
   }
-  console.log("deployedContractAddress", deployedContractAddress);
-  console.log("\nVERIFICATION....");
 
+  console.log("\nVERIFICATION....");
   try {
     await hre.run("verify:verify", {
       address: deployedContractAddress,

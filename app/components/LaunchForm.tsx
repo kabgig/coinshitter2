@@ -148,16 +148,16 @@ const LaunchForm = () => {
         name: values.tokenName,
         symbol: values.tokenSymbol,
         marketingFeeReceiver: values.marketingAddress,
-        devFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547", // выяснить как передавать из .env
-        marketingTaxBuy: 1,
-        marketingTaxSell: 2,
-        devTaxSell: 3,
-        devTaxBuy: 4,
-        lpTaxBuy: 5,
-        lpTaxSell: 6,
+        devFeeReceiver: process.env.NEXT_PUBLIC_DEV_ADDRESS!,
+        marketingTaxBuy: convertToStringEther(1),
+        marketingTaxSell: convertToStringEther(2),
+        devTaxSell: convertToStringEther(3),
+        devTaxBuy: convertToStringEther(4),
+        lpTaxBuy: convertToStringEther(5),
+        lpTaxSell: convertToStringEther(6),
         totalSupply: ethers.parseUnits(totalSupply.toString(), 18).toString(),
-        maxPercentageForWallet: 5,
-        maxPercentageForTx: 2,
+        maxPercentageForWallet: convertToStringEther(5),
+        maxPercentageForTx: convertToStringEther(2),
         swapRouter: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
         newOwner: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
       };
@@ -421,4 +421,7 @@ const LaunchForm = () => {
   );
 };
 
+const convertToStringEther = (number: number): string => {
+  return ethers.parseUnits(number.toString(), "ether").toString();
+};
 export default LaunchForm;

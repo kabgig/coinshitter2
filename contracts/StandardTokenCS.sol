@@ -582,31 +582,31 @@ contract StandardTokenCS is ERC20 /*, Ownable*/ {
         tokenInfo = _tokenInfo;
         deployerTax = _deployerTax;
 
-        // require(
-        //     _tokenInfo.maxPercentageForTx >= 0.5 ether &&
-        //         _tokenInfo.maxPercentageForTx <= 100 ether,
-        //     "TDP4"
-        // );
-        // require(
-        //     _tokenInfo.maxPercentageForWallet >= 0.5 ether &&
-        //         _tokenInfo.maxPercentageForWallet <= 100 ether,
-        //     "TDP4"
-        // );
+        require(
+            _tokenInfo.maxPercentageForTx >= 0.5 ether &&
+                _tokenInfo.maxPercentageForTx <= 100 ether,
+            "TDP4"
+        );
+        require(
+            _tokenInfo.maxPercentageForWallet >= 0.5 ether &&
+                _tokenInfo.maxPercentageForWallet <= 100 ether,
+            "TDP4"
+        );
 
-        // uint256 uBuyFee = tokenInfo.devTaxBuy +
-        //     tokenInfo.lpTaxBuy +
-        //     tokenInfo.marketingTaxBuy;
-        // uint256 uSellFee = tokenInfo.devTaxSell +
-        //     tokenInfo.lpTaxSell +
-        //     tokenInfo.marketingTaxSell;
-        // require(uBuyFee <= 15 ether && uSellFee <= 15 ether, "TDP1");
+        uint256 uBuyFee = tokenInfo.devTaxBuy +
+            tokenInfo.lpTaxBuy +
+            tokenInfo.marketingTaxBuy;
+        uint256 uSellFee = tokenInfo.devTaxSell +
+            tokenInfo.lpTaxSell +
+            tokenInfo.marketingTaxSell;
+        require(uBuyFee <= 15 ether && uSellFee <= 15 ether, "TDP1");
 
-        // maxAmountForWallet =
-        //     (_tokenInfo.maxPercentageForWallet * _tokenInfo.totalSupply) /
-        //     100 ether;
-        // maxAmountForTx =
-        //     (_tokenInfo.maxPercentageForTx * _tokenInfo.totalSupply) /
-        //     100 ether;
+        maxAmountForWallet =
+            (_tokenInfo.maxPercentageForWallet * _tokenInfo.totalSupply) /
+            100 ether;
+        maxAmountForTx =
+            (_tokenInfo.maxPercentageForTx * _tokenInfo.totalSupply) /
+            100 ether;
 
         // address swapFactory = IUniswapV2Router02(_tokenInfo.swapRouter)
         //     .factory();
@@ -639,6 +639,10 @@ contract StandardTokenCS is ERC20 /*, Ownable*/ {
         // _approve(address(this), tokenInfo.swapRouter, type(uint256).max);
     }
 
+    // deprecate later this getter
+    function getDevFeeReceiver() public view returns (address) {
+        return tokenInfo.devFeeReceiver;
+    }
     // function getTokenInfo() public view returns (TokenInfo memory _tokenInfo) {
     //     _tokenInfo = tokenInfo;
     // }

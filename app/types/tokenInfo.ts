@@ -3,15 +3,15 @@ export type TokenInfo = {
   symbol: string;
   marketingFeeReceiver: string; // address in Solidity is represented as string in TypeScript
   devFeeReceiver: string;
-  marketingTaxBuy: number; // uint256 in Solidity is represented as number or string in TypeScript
-  marketingTaxSell: number;
-  devTaxSell: number;
-  devTaxBuy: number;
-  lpTaxBuy: number;
-  lpTaxSell: number;
+  marketingTaxBuy: string; // uint256 in Solidity is represented as number or string in TypeScript
+  marketingTaxSell: string;
+  devTaxSell: string;
+  devTaxBuy: string;
+  lpTaxBuy: string;
+  lpTaxSell: string;
   totalSupply: string; // BigInt values should be represented as string to avoid serialization issues
-  maxPercentageForWallet: number;
-  maxPercentageForTx: number;
+  maxPercentageForWallet: string;
+  maxPercentageForTx: string;
   swapRouter: string;
   newOwner: string;
 };
