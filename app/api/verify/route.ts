@@ -1,7 +1,7 @@
 import { exec } from "child_process";
+import dotenv from "dotenv";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -19,6 +19,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         return "basesepolia";
       case "BSC_TESTNET":
         return "bsctestnet";
+      case "BASE_MAINNET":
+        return "base";
+      case "BSC_MAINNET":
+        return "bsc";
+      case "POLYGON":
+        return "polygon";
       default:
         return "unknown";
     }
@@ -30,7 +36,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       "scripts/verifyer.ts"
     );
     exec(
-      // `HARDHAT_NETWORK=basesepolia npx ts-node ${verificationScriptPath}`,
       `npx hardhat run ${verificationScriptPath} --network ${network}`,
       {
         env: {
@@ -48,7 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           return;
         }
 
-        console.log("\nScript output:\n\n" + stdout);
+        console.log("\nScript output:\n" + stdout);
 
         const jsonMatch = stdout.match(/\{.*?\}/);
         const urlMatch = stdout.match(/https:\/\/\S+/);
@@ -58,7 +63,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           try {
             const jsonOutput = JSON.parse(jsonMatch[0]);
             if (verifiedUrl) jsonOutput.verifiedUrl = verifiedUrl;
-            console.log("jsonOutput", jsonOutput);
             resolve(NextResponse.json(jsonOutput, { status: 201 }));
           } catch (parseError) {
             reject(

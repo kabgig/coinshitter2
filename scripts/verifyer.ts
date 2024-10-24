@@ -1,6 +1,6 @@
+import dotenv from "dotenv";
 import hre from "hardhat";
 import { TokenInfo } from "../app/types/tokenInfo";
-import dotenv from "dotenv";
 dotenv.config();
 
 export default async function main() {
@@ -14,7 +14,9 @@ export default async function main() {
     try {
       tokenInfo = JSON.parse(tokenInfoString) as TokenInfo;
     } catch (error) {
-      throw new Error("Failed to parse TOKEN_INFO environment variable");
+      throw new Error(
+        "Failed to parse TOKEN_INFO environment variable inside verifyer script"
+      );
     }
   }
 
@@ -26,19 +28,15 @@ export default async function main() {
   ) {
     throw new Error("Missing required environment variables");
   }
+
   console.log("\nVERIFICATION....");
-  console.log("tokenInfo.totalSupply2", tokenInfo.totalSupply);
   try {
     await hre.run("verify:verify", {
       address: deployedContractAddress,
-      constructorArguments: [
-        tokenInfo.name,
-        tokenInfo.symbol,
-        process.env.NEXT_PUBLIC_DEV_ADDRESS,
-        tokenInfo.totalSupply,
-      ],
-      contract: "contracts/StandardERC20.sol:StandardERC20",
+      constructorArguments: [tokenInfo, deployerTax, deployFeeReceiver],
+      contract: "contracts/StandardTokenCS.sol:StandardTokenCS",
     });
+
     console.log(
       JSON.stringify({ status: "success", message: "Verification successful" })
     );

@@ -21,7 +21,8 @@ import { useFormik } from "formik";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 //import CoinshitterArtifact from "../../artifacts/contracts/Coinshitter.sol/Coinshitter.json";
-import StandardERC20Artefact from "../../artifacts/contracts/StandardERC20.sol/StandardERC20.json";
+import dotenv from "dotenv";
+import StandardTokenCSArtifact from "../../artifacts/contracts/StandardTokenCS.sol/StandardTokenCS.json";
 import metamask from "../../public/metamask.png";
 import { networkDecimalIds } from "../configs/networkIds";
 import useLocale from "../hooks/useLocales";
@@ -29,7 +30,6 @@ import useGlobalStore from "../state/store";
 import { DeployedTokenInfo, TokenInfo } from "../types/tokenInfo";
 import FormTooltip from "./FormTooltip";
 import ProgressBadge from "./ProgressBadge";
-import dotenv from "dotenv";
 dotenv.config();
 
 const LaunchForm = () => {
@@ -121,7 +121,6 @@ const LaunchForm = () => {
 
       const selectedChainId = networkDecimalIds.get(values.chain);
       const totalSupply = values.totalSupply;
-      //const marketingAddress = values.marketingAddress;
 
       const provider = new ethers.BrowserProvider(window.ethereum);
       const walletNetwork = await provider.getNetwork();
@@ -134,7 +133,7 @@ const LaunchForm = () => {
         return;
       }
 
-      const artifact = StandardERC20Artefact;
+      const artifact = StandardTokenCSArtifact;
       const signer = await provider.getSigner();
       const contractABI = artifact.abi;
       const contractBytecode = artifact.bytecode;
@@ -148,17 +147,17 @@ const LaunchForm = () => {
       const tokenInfo: TokenInfo = {
         name: values.tokenName,
         symbol: values.tokenSymbol,
-        marketingFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
-        devFeeReceiver: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
-        marketingTaxBuy: 1,
-        marketingTaxSell: 2,
-        devTaxSell: 3,
-        devTaxBuy: 4,
-        lpTaxBuy: 5,
-        lpTaxSell: 6,
+        marketingFeeReceiver: values.marketingAddress,
+        devFeeReceiver: process.env.NEXT_PUBLIC_DEV_ADDRESS!,
+        marketingTaxBuy: convertToStringEther(1),
+        marketingTaxSell: convertToStringEther(2),
+        devTaxSell: convertToStringEther(3),
+        devTaxBuy: convertToStringEther(4),
+        lpTaxBuy: convertToStringEther(5),
+        lpTaxSell: convertToStringEther(6),
         totalSupply: ethers.parseUnits(totalSupply.toString(), 18).toString(),
-        maxPercentageForWallet: 5,
-        maxPercentageForTx: 2,
+        maxPercentageForWallet: convertToStringEther(5),
+        maxPercentageForTx: convertToStringEther(2),
         swapRouter: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
         newOwner: "0xE09cd000335F9029af7A5AF1763963b3c0e78547",
       };
@@ -168,18 +167,27 @@ const LaunchForm = () => {
 
       try {
         const contract = await factory.deploy(
-          values.tokenName,
-          values.tokenSymbol,
-          process.env.NEXT_PUBLIC_DEV_ADDRESS,
-          tokenInfo.totalSupply
+          tokenInfo,
+          deployerTax,
+          deployFeeReceiver
         );
         setInterfaceLogMessage("Deploying token...");
         await contract.waitForDeployment();
 
+        const txResponse = await contract.deploymentTransaction();
+        if (txResponse) {
+          setInterfaceLogMessage(
+            "Token deployed. Waiting for confirmations..."
+          );
+          await txResponse.wait(5);
+        } else {
+          throw new Error(
+            "Failed to get deployment transaction confirmations. No txResponse"
+          );
+        }
+
         const contractAddress = await contract.getAddress();
-        setInterfaceLogMessage(
-          `Token is deployed!\nVerifying ${contractAddress}`
-        );
+        setInterfaceLogMessage(`Verifying ${contractAddress}`);
 
         const result = await axios.post("/api/verify", {
           tokenInfo: JSON.stringify(tokenInfo),
@@ -237,11 +245,11 @@ const LaunchForm = () => {
             <InputGroup>
               {/* //TODO separation of the testnets from mainnets */}
               <Select placeholder="Choose" {...formik.getFieldProps("chain")}>
-                {/* <option value="BASE_MAINNET">Base Mainnet</option> */}
+                <option value="POLYGON">Polygon Mainnet</option>
+                <option value="BASE_MAINNET">Base Mainnet</option>
                 {/* <option value="BSC_MAINNET">BSC Mainnet</option> */}
                 <option value="BASE_TESTNET_SEPOLIA">Base Sepolia</option>
                 <option value="BSC_TESTNET">BSC Testnet</option>
-                {/* <option value="HARDHAT">Hardhat</option> */}
               </Select>
             </InputGroup>
             {formik.touched.chain && formik.errors.chain ? (
@@ -413,4 +421,7 @@ const LaunchForm = () => {
   );
 };
 
+const convertToStringEther = (number: number): string => {
+  return ethers.parseUnits(number.toString(), "ether").toString();
+};
 export default LaunchForm;
